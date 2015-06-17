@@ -1786,6 +1786,9 @@ INSTALLED_APPS = (
     'staticfiles',
     'static_replace',
 
+    # Theming
+    'openedx.core.djangoapps.theming',
+
     # Our courseware
     'circuit',
     'courseware',
