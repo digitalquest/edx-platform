@@ -23,6 +23,7 @@
 $annotation-yellow: rgba(255,255,10,0.3);
 $color-copy-tip: rgb(100,100,100);
 $correct: $green-d1;
+$partiallycorrect: $green-d1;
 $incorrect: $red;
 
 // +Extends - Capa
@@ -72,6 +73,11 @@ h2 {
 .feedback-hint-correct {
   margin-top: ($baseline/2);
   color: $correct;
+}
+
+.feedback-hint-partially-correct {
+  margin-top: ($baseline/2);
+  color: $partiallycorrect;
 }
 
 .feedback-hint-incorrect {
@@ -169,6 +175,16 @@ div.problem {
         }
       }
 
+      &.choicegroup_partially-correct {
+        @include status-icon($partiallycorrect, "\f00c");
+        border: 2px solid $partiallycorrect;
+
+        // keep green for correct answers on hover. 
+        &:hover {
+          border-color: $partiallycorrect;
+        }
+      }
+
       &.choicegroup_incorrect {
         @include status-icon($incorrect, "\f00d");
         border: 2px solid $incorrect;
@@ -220,6 +236,11 @@ div.problem {
       // CASE: correct answer
       &.correct {
         @include status-icon($correct, "\f00c");
+      }
+
+      // CASE: partially correct answer
+      &.partially-correct {
+        @include status-icon($partiallycorrect, "\f00c");
       }
 
       // CASE: incorrect answer
@@ -330,6 +351,19 @@ div.problem {
 
       input {
         border-color: $correct;
+      }
+    }
+
+    &.partially-correct, &.ui-icon-check {
+      p.status {
+        display: inline-block;
+        width: 25px;
+        height: 20px;
+        background: url('../images/partially-correct-icon.png') center center no-repeat;
+      }
+
+      input {
+        border-color: $partiallycorrect;
       }
     }
 
@@ -458,15 +492,6 @@ div.problem {
         width: 25px;
         height: 20px;
         background: url('../images/correct-icon.png') center center no-repeat;
-      }
-
-      &.partially-correct {
-        display: inline-block;
-        position: relative;
-        top: 6px;
-        width: 25px;
-        height: 20px;
-        background: url('../images/partially-correct-icon.png') center center no-repeat;
       }
 
       &.incomplete, &.ui-icon-close {
@@ -717,7 +742,7 @@ div.problem {
       height: 46px;
     }
 
-    > .incorrect, .correct, .unanswered {
+    > .incorrect, .partially-correct, .correct, .unanswered {
 
       .status {
         display: inline-block;
@@ -735,6 +760,18 @@ div.problem {
 
       .status {
         @include status-icon($incorrect, "\f00d");
+      }
+    }
+
+    // CASE: partially correct answer
+    > .partially-correct {
+      
+      input { 
+        border: 2px solid $partiallycorrect;
+      }
+
+      .status {
+        @include status-icon($partiallycorrect, "\f00c");
       }
     }
 
@@ -779,7 +816,7 @@ div.problem {
     .indicator-container {
       display: inline-block;
 
-      .status.correct:after, .status.incorrect:after {
+      .status.correct:after, .status.partially-correct:after, .status.incorrect:after {
         @include margin-left(0);
       }
     }
@@ -932,6 +969,20 @@ div.problem {
     > p:first-child {
        @extend %t-strong;
       color: $incorrect;
+      text-transform: uppercase;
+      font-style: normal;
+      font-size: 0.9em;
+    }
+
+    p:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  .detailed-targeted-feedback-partially-correct {
+    > p:first-child {
+       @extend %t-strong;
+      color: $partiallycorrect;
       text-transform: uppercase;
       font-style: normal;
       font-size: 0.9em;
@@ -1130,6 +1181,14 @@ div.problem {
 
         .result-correct {
           background: url('../images/correct-icon.png') left 20px no-repeat;
+
+          .result-actual-output {
+            color: #090;
+          }
+        }
+
+        .result-partially-correct {
+          background: url('../images/partially-correct-icon.png') left 20px no-repeat;
 
           .result-actual-output {
             color: #090;
@@ -1338,6 +1397,14 @@ div.problem {
 
       input[type="text"] {
         border-color: $correct;
+      }
+    }
+
+    label.choicetextgroup_partially-correct, section.choicetextgroup_partially-correct {
+      @extend label.choicegroup_partially-correct;
+
+      input[type="text"] {
+        border-color: $partiallycorrect;
       }
     }
 
