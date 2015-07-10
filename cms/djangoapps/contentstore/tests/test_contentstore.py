@@ -96,6 +96,7 @@ class ImportRequiredTestCases(ContentStoreTestCase):
     """
     Tests which legitimately need to import a course
     """
+
     def test_no_static_link_rewrites_on_import(self):
         course_items = import_course_from_xml(
             self.store, self.user.id, TEST_DATA_DIR, ['toy'], create_if_not_present=True
@@ -113,6 +114,68 @@ class ImportRequiredTestCases(ContentStoreTestCase):
     def test_xlint_fails(self):
         err_cnt = perform_xlint(TEST_DATA_DIR, ['toy'])
         self.assertGreater(err_cnt, 0)
+
+    def test_invalid_asset_overwrite(self):
+        """
+        Tests that an asset with invalid displayname can be overwritten if multiple assets have same displayname.
+        It Verifies that:
+            During import, '/' in displayname of an asset are replaced with underscores '_'.
+            Export does not fail when an asset has '/' in its displayname. If the converted display matches with
+            any other asset, then it will be replaced.
+
+        Asset name in XML: /invalid/displayname/subs-esLhHcdKGWvKs.srt
+        """
+        content_store = contentstore()
+        expected_displayname = '_invalid_displayname_subs-esLhHcdKGWvKs.srt'
+
+        import_course_from_xml(
+            self.store,
+            self.user.id,
+            TEST_DATA_DIR,
+            ['import_draft_order'],
+            static_content_store=content_store,
+            verbose=True,
+            create_if_not_present=True
+        )
+
+        # Verify the course has imported successfully
+        course = self.store.get_course(self.store.make_course_key(
+            'test_org',
+            'import_draft_order',
+            'import_draft_order')
+        )
+        self.assertIsNotNone(course)
+
+        # Add a new asset in the course
+        asset_key = course.id.make_asset_key('asset', 'sample_asset.srt')
+        content = StaticContent(
+            asset_key, expected_displayname, 'application/text', 'test',
+        )
+        content_store.save(content)
+
+        # Get & verify all assets of the course
+        assets, count = content_store.get_all_content_for_course(course.id)
+        self.assertEqual(count, 2)
+
+        # Verify both assets have similar 'displayname' after saving.
+        for asset in assets:
+            self.assertEquals(asset['displayname'], expected_displayname)
+
+        # Test course export does not fail
+        root_dir = path(mkdtemp_clean())
+        print 'Exporting to tempdir = {0}'.format(root_dir)
+        export_course_to_xml(self.store, content_store, course.id, root_dir, 'test_export')
+
+        # Verify that asset have been overwritten during export.
+        filesystem = OSFS(root_dir / 'test_export/static')
+        exported_static_files = filesystem.listdir()
+
+        self.assertTrue(filesystem.exists(expected_displayname))
+        self.assertEqual(len(exported_static_files), 1)
+        self.assertEqual(exported_static_files[0], expected_displayname)
+
+        # Remove exported course
+        shutil.rmtree(root_dir)
 
     def test_about_overrides(self):
         '''
@@ -625,6 +688,75 @@ class MiscCourseTests(ContentStoreTestCase):
             ['Word cloud', 'Annotation', 'Text Annotation', 'Video Annotation', 'Image Annotation',
              'Open Response Assessment', 'Peer Grading Interface', 'split_test'],
         )
+
+    def test_export_on_invalid_displayname(self):
+        """ Tests that assets with invalid 'displayname' does not cause export to fail """
+        content_store = contentstore()
+        invalid_displayname = '/Fake/asset/dispnayname'
+        exported_asset_name = '_Fake_asset_dispnayname'
+
+        # Create an asset with slash '/' in its 'displayname'
+        asset_key = self.course.id.make_asset_key('asset', "fake_asset.txt")
+        content = StaticContent(
+            asset_key, invalid_displayname, 'application/text', 'test',
+        )
+        content_store.save(content)
+
+        # Get & verify course assets
+        assets, count = content_store.get_all_content_for_course(self.course.id)
+        self.assertEqual(count, 1)
+        display_name = assets[0]['displayname']
+        self.assertEqual(display_name, invalid_displayname)
+
+        # Now export the course to a tempdir and test that it contains assets. This should pass
+        root_dir = path(mkdtemp_clean())
+        print 'Exporting to tempdir = {0}'.format(root_dir)
+        export_course_to_xml(self.store, content_store, self.course.id, root_dir, 'test_export')
+
+        # Verify that asset name has been modified in export.
+        filesystem = OSFS(root_dir / 'test_export/static')
+        exported_static_files = filesystem.listdir()
+        self.assertTrue(filesystem.exists(exported_asset_name))
+        self.assertEqual(len(exported_static_files), 1)
+
+        # Remove tempdir
+        shutil.rmtree(root_dir)
+
+    def test_assets_overwrite(self):
+        """ Tests that assets will similar 'displayname' will be overwritten during export """
+        content_store = contentstore()
+        asset_displayname = 'Fake_asset.txt'
+
+        # Create two assets with similar 'displayname'
+        for i in range(2):
+            asset_path = 'sample_asset_{}.txt'.format(i)
+            asset_key = self.course.id.make_asset_key('asset', asset_path)
+            content = StaticContent(
+                asset_key, asset_displayname, 'application/text', 'test',
+            )
+            content_store.save(content)
+
+        # Fetch & verify course assets to be equal to 2.
+        assets, count = content_store.get_all_content_for_course(self.course.id)
+        self.assertEqual(count, 2)
+
+        # Verify both assets have similar 'displayname' after saving.
+        for asset in assets:
+            self.assertEquals(asset['displayname'], asset_displayname)
+
+        # Now export the course to a tempdir and test that it contains assets.
+        root_dir = path(mkdtemp_clean())
+        print 'Exporting to tempdir = {0}'.format(root_dir)
+        export_course_to_xml(self.store, content_store, self.course.id, root_dir, 'test_export')
+
+        # Verify that asset have been overwritten during export.
+        filesystem = OSFS(root_dir / 'test_export/static')
+        exported_static_files = filesystem.listdir()
+        self.assertTrue(filesystem.exists(asset_displayname))
+        self.assertEqual(len(exported_static_files), 1)
+
+        # Remove tempdir
+        shutil.rmtree(root_dir)
 
     def test_advanced_components_require_two_clicks(self):
         self.check_components_on_page(['word_cloud'], ['Word cloud'])
@@ -1592,7 +1724,6 @@ class ContentStoreTest(ContentStoreTestCase):
 
 class MetadataSaveTestCase(ContentStoreTestCase):
     """Test that metadata is correctly cached and decached."""
-
     def setUp(self):
         super(MetadataSaveTestCase, self).setUp()
 
@@ -1653,6 +1784,7 @@ class RerunCourseTest(ContentStoreTestCase):
     """
     Tests for Rerunning a course via the view handler
     """
+
     def setUp(self):
         super(RerunCourseTest, self).setUp()
         self.destination_course_data = {
@@ -1903,6 +2035,7 @@ class ContentLicenseTest(ContentStoreTestCase):
     """
     Tests around content licenses
     """
+
     def test_course_license_export(self):
         content_store = contentstore()
         root_dir = path(mkdtemp_clean())

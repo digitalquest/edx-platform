@@ -107,6 +107,12 @@ def import_static_content(
 
             policy_ele = policy.get(asset_key.path, {})
             displayname = policy_ele.get('displayname', filename)
+
+            # During export display name is used to create files, it should not contain '/'. TNL-2669
+            # strip away slashes from path from the name
+            if '/' in displayname:
+                displayname = displayname.replace('/', '_')
+
             locked = policy_ele.get('locked', False)
             mime_type = policy_ele.get('contentType')
 

@@ -17,7 +17,6 @@ from xmodule.modulestore.django import ASSET_IGNORE_REGEX
 
 
 class MongoContentStore(ContentStore):
-
     # pylint: disable=unused-argument
     def __init__(self, host, db, port=27017, user=None, password=None, bucket='fs', collection=None, **kwargs):
         """
@@ -131,15 +130,20 @@ class MongoContentStore(ContentStore):
     def export(self, location, output_directory):
         content = self.find(location)
 
+        filename = content.name
         if content.import_path is not None:
             output_directory = output_directory + '/' + os.path.dirname(content.import_path)
 
         if not os.path.exists(output_directory):
             os.makedirs(output_directory)
 
+        # Strip '/' from filename if there are any.
+        if '/' in filename:
+            filename = filename.replace('/', '_')
+
         disk_fs = OSFS(output_directory)
 
-        with disk_fs.open(content.name, 'wb') as asset_file:
+        with disk_fs.open(filename, 'wb') as asset_file:
             asset_file.write(content.data)
 
     def export_all_for_course(self, course_key, output_directory, assets_policy_file):
@@ -397,7 +401,8 @@ class MongoContentStore(ContentStore):
             sparse=True
         )
         self.fs_files.create_index(
-            [('content_son.org', pymongo.ASCENDING), ('content_son.course', pymongo.ASCENDING), ('content_son.name', pymongo.ASCENDING)],
+            [('content_son.org', pymongo.ASCENDING), ('content_son.course', pymongo.ASCENDING),
+             ('content_son.name', pymongo.ASCENDING)],
             sparse=True
         )
         self.fs_files.create_index(
@@ -409,11 +414,13 @@ class MongoContentStore(ContentStore):
             sparse=True
         )
         self.fs_files.create_index(
-            [('content_son.org', pymongo.ASCENDING), ('content_son.course', pymongo.ASCENDING), ('uploadDate', pymongo.ASCENDING)],
+            [('content_son.org', pymongo.ASCENDING), ('content_son.course', pymongo.ASCENDING),
+             ('uploadDate', pymongo.ASCENDING)],
             sparse=True
         )
         self.fs_files.create_index(
-            [('content_son.org', pymongo.ASCENDING), ('content_son.course', pymongo.ASCENDING), ('display_name', pymongo.ASCENDING)],
+            [('content_son.org', pymongo.ASCENDING), ('content_son.course', pymongo.ASCENDING),
+             ('display_name', pymongo.ASCENDING)],
             sparse=True
         )
 
