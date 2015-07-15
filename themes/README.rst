@@ -15,7 +15,7 @@ The contents of each of these files will be very similar. Here's what
 
 .. code-block::
 
-    $static-path: '../../../edx-platform/lms/static';
+    $static-path: '../../../..';
     @import 'lms/static/sass/lms-main';
     @import '_default';
 
