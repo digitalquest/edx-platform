@@ -1,8 +1,22 @@
 ;(function (define, undefined) {
     'use strict';
     define([
-        'gettext', 'jquery', 'underscore', 'backbone', 'backbone-super', 'jquery.fileupload'
-    ], function (gettext, $, _, Backbone) {
+        'gettext', 'jquery', 'underscore', 'backbone', 
+        'text!templates/fields/field_readonly.underscore',
+        'text!templates/fields/field_dropdown.underscore',
+        'text!templates/fields/field_link.underscore',
+        'text!templates/fields/field_text.underscore',
+        'text!templates/fields/field_textarea.underscore',
+        'text!templates/fields/field_image.underscore',
+        'backbone-super', 'jquery.fileupload'
+    ], function (gettext, $, _, Backbone,
+                 field_readonly_template,
+                 field_dropdown_template,
+                 field_link_template,
+                 field_text_template,
+                 field_textarea_template,
+                 field_image_template
+    ) {
 
         var messageRevertDelay = 6000;
         var FieldViews = {};
@@ -36,7 +50,7 @@
 
             initialize: function () {
 
-                this.template = _.template($(this.templateSelector).text());
+                this.template = _.template(this.fieldTemplate);
 
                 this.helpMessage = this.options.helpMessage || '';
                 this.showMessages = _.isUndefined(this.options.showMessages) ? true : this.options.showMessages;
@@ -219,6 +233,14 @@
                         this.showDisplayMode(true);
                     }
                 }
+            },
+
+            highlightFieldOnError: function () {
+                this.$el.addClass('error');
+            },
+
+            unhighlightField: function () {
+                this.$el.removeClass('error');
             }
         });
 
@@ -226,7 +248,7 @@
 
             fieldType: 'readonly',
 
-            templateSelector: '#field_readonly-tpl',
+            fieldTemplate: field_readonly_template,
 
             initialize: function (options) {
                 this._super(options);
@@ -259,13 +281,22 @@
 
             fieldType: 'text',
 
-            templateSelector: '#field_text-tpl',
+            fieldTemplate: field_text_template,
 
-            events: {
-                'change input': 'saveValue'
+            events: function () {
+                var events_hash = {
+                    'change input': 'saveValue'
+                };
+
+                if(this.bindEvents || _.isUndefined(this.bindEvents)) {
+                    return events_hash;
+                } else {
+                    return {};
+                }
             },
 
             initialize: function (options) {
+                this.bindEvents = options.bindEvents;
                 this._super(options);
                 _.bindAll(this, 'render', 'fieldValue', 'updateValueInField', 'saveValue');
                 this.listenTo(this.model, "change:" + this.options.valueAttribute, this.updateValueInField);
@@ -302,15 +333,24 @@
 
             fieldType: 'dropdown',
 
-            templateSelector: '#field_dropdown-tpl',
+            fieldTemplate: field_dropdown_template,
 
-            events: {
-                'click': 'startEditing',
-                'change select': 'finishEditing',
-                'focusout select': 'finishEditing'
+            events: function () {
+                var events_hash = {
+                    'click': 'startEditing',
+                    'change select': 'finishEditing',
+                    'focusout select': 'finishEditing'
+                };
+
+                if(this.bindEvents || _.isUndefined(this.bindEvents)) {
+                    return events_hash;
+                } else {
+                    return {};
+                }
             },
 
             initialize: function (options) {
+                this.bindEvents = options.bindEvents;
                 _.bindAll(this, 'render', 'optionForValue', 'fieldValue', 'displayValue', 'updateValueInField', 'saveValue');
                 this._super(options);
 
@@ -421,20 +461,29 @@
 
             fieldType: 'textarea',
 
-            templateSelector: '#field_textarea-tpl',
+            fieldTemplate: field_textarea_template,
 
-            events: {
-                'click .wrapper-u-field': 'startEditing',
-                'click .u-field-placeholder': 'startEditing',
-                'focusout textarea': 'finishEditing',
-                'change textarea': 'adjustTextareaHeight',
-                'keyup textarea': 'adjustTextareaHeight',
-                'keydown textarea': 'onKeyDown',
-                'paste textarea': 'adjustTextareaHeight',
-                'cut textarea': 'adjustTextareaHeight'
+            events: function () {
+                var events_hash = {
+                    'click .wrapper-u-field': 'startEditing',
+                    'click .u-field-placeholder': 'startEditing',
+                    'focusout textarea': 'finishEditing',
+                    'change textarea': 'adjustTextareaHeight',
+                    'keyup textarea': 'adjustTextareaHeight',
+                    'keydown textarea': 'onKeyDown',
+                    'paste textarea': 'adjustTextareaHeight',
+                    'cut textarea': 'adjustTextareaHeight'
+                };
+
+                if(this.bindEvents || _.isUndefined(this.bindEvents)) {
+                    return events_hash;
+                } else {
+                    return {};
+                }
             },
 
             initialize: function (options) {
+                this.bindEvents = options.bindEvents;
                 _.bindAll(this, 'render', 'onKeyDown', 'adjustTextareaHeight', 'fieldValue', 'saveValue', 'updateView');
                 this._super(options);
                 this.listenTo(this.model, "change:" + this.options.valueAttribute, this.updateView);
@@ -451,6 +500,7 @@
                     mode: this.mode,
                     value: value,
                     message: this.helpMessage,
+                    descriptionMessage: this.options.descriptionMessage,
                     placeholderValue: this.options.placeholderValue
                 }));
                 this.delegateEvents();
@@ -520,7 +570,7 @@
 
             fieldType: 'link',
 
-            templateSelector: '#field_link-tpl',
+            fieldTemplate: field_link_template,
 
             events: {
                 'click a': 'linkClicked'
@@ -553,7 +603,7 @@
 
             fieldType: 'image',
 
-            templateSelector: '#field_image-tpl',
+            fieldTemplate: field_image_template,
             uploadButtonSelector: '.upload-button-input',
 
             titleAdd: gettext("Upload an image"),

@@ -6,8 +6,12 @@
     define(['backbone', 'text!templates/components/header/header.underscore'],
            function (Backbone, headerTemplate) {
                var HeaderView = Backbone.View.extend({
+
+                   actionsViewSelector: '.page-header-actions',
+
                    initialize: function (options) {
                        this.template = _.template(headerTemplate);
+                       this.actionsView = options.actionsView;
                        this.listenTo(this.model, 'change', this.render);
                        this.render();
                    },
@@ -15,6 +19,12 @@
                    render: function () {
                        var json = this.model.attributes;
                        this.$el.html(this.template(json));
+
+                       // Render action view if there is one
+                       if (this.actionsView) {
+                           this.actionsView.setElement(this.$(this.actionsViewSelector)).render();
+                       }
+
                        return this;
                    }
                });

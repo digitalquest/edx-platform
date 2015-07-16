@@ -15,4 +15,8 @@
         }
         %><span class="sr" id="u-field-placeholder-value-<%- id %>"><%- placeholderValue %></span>
     </div>
+
+    <% if (descriptionMessage) { %>
+        <p class="u-field-description-message" id="u-field-message-help-<%- id %>"><%- descriptionMessage %></p>
+    <% } %>
 </div>

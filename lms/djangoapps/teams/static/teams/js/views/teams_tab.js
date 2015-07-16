@@ -38,6 +38,8 @@
                        this.topic_url = options.topic_url;
                        this.teams_url = options.teams_url;
                        this.maxTeamSize = options.maxTeamSize;
+                       this.languages = options.languages;
+                       this.countries = options.countries;
                        // This slightly tedious approach is necessary
                        // to use regular expressions within Backbone
                        // routes, allowing us to capture which tab
@@ -172,6 +174,14 @@
                                    per_page: 10,
                                    parse: true
                                }),
+                               teamParams: {
+                                   courseId: this.course_id,
+                                   teamsUrl: this.teams_url,
+                                   topicId: topic.get('id'),
+                                   topicName: topic.get('name'),
+                                   languages: self.languages,
+                                   countries: self.countries
+                               },
                                maxTeamSize: this.maxTeamSize
                            })
                        });

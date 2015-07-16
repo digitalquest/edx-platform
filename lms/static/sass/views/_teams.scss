@@ -472,4 +472,209 @@
       padding-left: 2%;
     }
   }
+
+  .add-team {
+    @extend %ui-well;
+    margin: 20px 1.2%;
+    color: $gray;
+    text-align: center;
+
+    .title {
+      @extend %t-title6;
+      @extend %t-strong;
+      margin-bottom: ($baseline/2);
+      text-align: inherit;
+      color: inherit;
+    }
+
+    .copy {
+      text-align: inherit;
+      color: inherit;
+    }
+  }
+}
+
+.teams-content {
+
+  .page-header {
+    border-bottom: 2px solid $m-green-s1;
+  }
+
+  .create-new-team {
+    padding: $baseline;
+    overflow: hidden;
+
+    .team-required-fields {
+      @include float(left);
+      width: 55%;
+      border-right: 2px solid $gray-l4;;
+
+      .u-field.u-field-name {
+        padding-bottom: $baseline;
+
+        .u-field-value {
+          display: block;
+          width: 90%;
+
+          input {
+            border-radius: ($baseline/5);
+            height: ($baseline*2);
+          }
+        }
+
+        .u-field-message {
+          @include padding-left(0);
+          padding-top: ($baseline/4);
+          width: 100%;
+        }
+      }
+
+      .u-field.u-field-description {
+
+        .u-field-value {
+          display: block;
+          width: 100%;
+
+          textarea {
+            height: ($baseline*5);
+            width: 90%;
+            border-radius: ($baseline/5)
+          }
+        }
+
+        .u-field-description-message {
+          @extend %t-copy-sub1;
+          margin-top: ($baseline/4);
+          color: $gray-l1;
+          width: 90%;
+        }
+      }
+
+      .u-field-title {
+        padding-bottom: ($baseline/4);
+        color: $base-font-color;
+        width: 40%;
+      }
+    }
+
+    .team-optional-fields {
+      @include float(left);
+      @include margin-left($baseline);
+      width: 40%;
+
+      .u-field.u-field-optional_description {
+        margin-bottom: $baseline;
+
+        .u-field-title {
+          color: $base-font-color;
+          font-weight: $font-semibold;
+          margin-bottom: ($baseline/2);
+          width: 100%;
+        }
+
+        .u-field-value {
+          display: none;
+        }
+      }
+
+      .u-field.u-field-language {
+        margin-bottom: $baseline;
+      }
+
+      .u-field-value-display {
+        display: none;
+      }
+
+      .u-field-value {
+        width: 90%;
+      }
+
+      .u-field-title {
+        display: block;
+        color: $base-font-color;
+        width: 35%;
+      }
+
+      .u-field-message {
+        @include padding-left(0);
+        width: 95%;
+      }
+    }
+
+    .u-field {
+      padding: 0;
+    }
+
+    .u-field.error {
+      input, textarea {
+        border-color: $red;
+      }
+
+      .u-field-message-help, .u-field-description-message {
+        color: $red !important;
+      }
+    }
+
+    .wrapper-msg {
+      display: none;
+      margin: 0 0 $baseline 0;
+    }
+  }
+}
+
+@mixin button-base-sytle($text-color) {
+  font-family: inherit;
+  font-size: 1em;
+  font-weight: 400;
+  text-shadow: none;
+
+  background: none;
+  border: none;
+  box-shadow: none;
+
+  color: $text-color;
+
+  &:hover {
+      background: none;
+  }
+
+  &:focus, &:active {
+    box-shadow: none;
+  }
+}
+
+.page-header-actions {
+  button.action-cancel {
+    @include button-base-sytle($m-gray);
+    @include padding-right($baseline);
+  }
+
+  button.action-create {
+    @include button-base-sytle($white);
+    border-radius: ($baseline/4);
+    background-color: $m-green-s1 !important;
+    height: ($baseline*2);
+    width: 90px;
+  }
+}
+
+%team-edit-notification-base {
+  margin-bottom: $baseline;
+  border-left: ($baseline/2) solid red;
+  height: 50px;
+  border-radius: ($baseline/4);
+  padding-left: ($baseline/4);
+  line-height: 50px;
+}
+
+.team-edit-notification-wrapper.error {
+  @extend %team-edit-notification-base;
+  border-left: ($baseline/2) solid $red;
+  background-color: $red-l1;
+}
+
+.team-edit-notification-wrapper.success {
+  @extend %team-edit-notification-base;
+  border-left: ($baseline/2) solid $m-green-s1;
+  background-color: $green-l1;
 }
