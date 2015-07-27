@@ -21,7 +21,8 @@ from certificates.models import (
     CertificateGenerationCourseSetting,
     CertificateGenerationConfiguration,
     ExampleCertificateSet,
-    GeneratedCertificate
+    GeneratedCertificate,
+    CertificateTemplate,
 )
 from certificates.queue import XQueueCertInterface
 
@@ -313,6 +314,31 @@ def get_active_web_certificate(course, is_preview_mode=None):
         if config.get('is_active') or is_preview_mode:
             return config
     return None
+
+
+def get_certificate_template(course_key, mode):
+    """
+    Retrieves the custom certificate template based on course_key and mode.
+    """
+    # grab orgnazation_id of the course
+    from get_course_organizations
+    if org_id and course_key and mode:
+        template = CertificateTemplate.objects.filter(
+            organization_id=org_id,
+            course_key=course_key,
+            mode=mode
+        ).first()
+    elif org_id and course_key:
+        template = CertificateTemplate.objects.filter(
+            organization_id=org_id,
+            course_key=course_key
+        ).first()
+    elif org_id:
+        template = CertificateTemplate.objects.filter(
+            organization_id=org_id
+        ).first()
+
+    return template
 
 
 def emit_certificate_event(event_name, user, course_id, course=None, event_data=None):

@@ -11,6 +11,7 @@ import logging
 
 from django.conf import settings
 from django.contrib.auth.models import User
+from django.template import Template
 from django.http import HttpResponse, Http404, HttpResponseForbidden
 from django.utils.translation import ugettext as _
 from django.views.decorators.csrf import csrf_exempt
@@ -22,7 +23,8 @@ from certificates.api import (
     get_certificate_url,
     generate_user_certificates,
     emit_certificate_event,
-    has_html_certificates_enabled
+    has_html_certificates_enabled,
+    get_certificate_template
 )
 from certificates.models import (
     certificate_status_for_student,
@@ -613,6 +615,14 @@ def render_html_view(request, user_id, course_id):
     context.update(course.cert_html_view_overrides)
 
     # FINALLY, generate and send the output the client
+    if settings.FEATURES.get('CUSTOM_CERTIFICATE_TEMPLATE_ENABLED', False):
+        custom_template = get_certificate_template(org, course_key, user_certificate.mode)
+        if custom_template:
+            template = Template(custom_template)
+            return template.render(context)
+        else:
+            return render_to_response(invalid_template_path, context)
+
     return render_to_response("certificates/valid.html", context)
 
 
