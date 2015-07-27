@@ -4,9 +4,9 @@ Tests for course_overviews app.
 import datetime
 import ddt
 import itertools
-import pytz
 import math
 import mock
+import pytz
 
 from django.utils import timezone
 
@@ -331,3 +331,45 @@ class CourseOverviewTestCase(ModuleStoreTestCase):
             __ = course.lowest_passing_grade
         course_overview = CourseOverview._create_from_course(course)  # pylint: disable=protected-access
         self.assertEqual(course_overview.lowest_passing_grade, None)
+
+    def test_course_overview_saving_race_condition(self):
+        """
+        Tests that the following scenario will not cause an unhandled exception:
+        - A CourseOverview is requested.
+        - The overview doesn't exist, we begin creating one by the loading the
+          entire CourseDescriptor.
+        - While that is being computed, another CourseOverview is requested for
+          the same course, and we being creating that one as well.
+        - One of the two overviews finishes first and saves to the database.
+        - The second overview tries to save to the database as well, raising
+          an IntegrityError due to the duplicate entries. This should be
+          handled gracefully in CourseOverview.get_from_id.
+
+        Created in response to https://openedx.atlassian.net/browse/MA-1061.
+        """
+        course = CourseFactory.create()
+        course_overviews = []
+
+        def load_course_overview():
+            """
+            Load a CourseOverview for course and append it to course_overviews.
+            """
+            course_overviews.append(CourseOverview.get_from_id(course.id))
+
+        def mock_get_course(store, course_key, depth=0, **kwargs):
+            """
+            Load another CourseOverview before returning the result of the real
+            get_course.
+            """
+            get_course_patch.stop()  # Make it so mock_get_course is not called again.
+            load_course_overview()
+            return store.get_course(course_key, depth=depth, **kwargs)
+
+        get_course_patch = mock.patch('xmodule.modulestore.mixed.MixedModuleStore.get_course', mock_get_course)
+        get_course_patch.start()
+        load_course_overview()  # Will cause a call to mock_get_course.
+
+        # Assert that both CourseOverviews were loaded successfully.
+        self.assertEqual(len(course_overviews), 2)
+        for course_overview in course_overviews:
+            self.assertIsInstance(course_overview, CourseOverview)
