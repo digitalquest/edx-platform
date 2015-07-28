@@ -16,7 +16,7 @@ define(['backbone',
                    this.eventAggregator = _.extend({}, Backbone.Events);
 
                    this.headerModel = new HeaderModel({
-                       description: gettext("Create a new team when you can't find existing teams to join, or if you would like to learn with friends you know."),
+                       description: gettext("Create a new team if you can't find existing teams to join, or if you would like to learn with friends you know."),
                        title: gettext("New Team"),
                        breadcrumbs: [{title: options.teamParams.topicName, url: options.teamParams.href}]
                    });

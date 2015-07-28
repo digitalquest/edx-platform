@@ -563,12 +563,12 @@
       width: 40%;
 
       .u-field.u-field-optional_description {
-        margin-bottom: $baseline;
+        margin-bottom: ($baseline/5);
 
         .u-field-title {
           color: $base-font-color;
           font-weight: $font-semibold;
-          margin-bottom: ($baseline/2);
+          margin-bottom: ($baseline/5);
           width: 100%;
         }
 
@@ -578,7 +578,7 @@
       }
 
       .u-field.u-field-language {
-        margin-bottom: $baseline;
+        margin-bottom: ($baseline/5);
       }
 
       .u-field-value-display {

@@ -11,6 +11,7 @@ define(['backbone',
            return Backbone.View.extend({
 
                maxTeamNameLength: 255,
+               maxTeamDescriptionLength: 300,
 
                initialize: function(options) {
                    this.courseId = options.teamParams.courseId;
@@ -30,7 +31,7 @@ define(['backbone',
                        title: gettext("Team Name (Required) *"),
                        valueAttribute: 'name',
                        bindEvents: false,
-                       helpMessage: gettext("The name that will identify your team")
+                       helpMessage: gettext("A name that identifies your team (maximum 255 characters).")
                    });
 
                    this.teamDescriptionField = new FieldViews.TextareaFieldView({
@@ -40,14 +41,14 @@ define(['backbone',
                        editable: 'always',
                        showMessages: false,
                        bindEvents: false,
-                       descriptionMessage: gettext("A short description of the team to help other students understand the goals or directives the team is pursuing")
+                       descriptionMessage: gettext("A short description of the team to help other learners understand the goals or direction of the team (maximum 300 characters).")
                    });
 
                    this.optionalDescriptionField = new FieldViews.ReadonlyFieldView({
                        model: new TeamModel(),
                        title: gettext("Optional Characteristics"),
                        valueAttribute: 'optional_description',
-                       helpMessage: gettext("You can help students find your team by specifying your team's characteristics. The more limitations you add, the fewer students may be interested in joining your group, so choose carefully!")
+                       helpMessage: gettext("Help other learners decide whether to join your team by specifying some characteristics for your team. Choose carefully, because fewer people might be interested in joining your team if it seems too restrictive.")
                    });
 
                    this.teamLanguageField = new FieldViews.DropdownFieldView({
@@ -59,7 +60,7 @@ define(['backbone',
                        bindEvents: false,
                        titleIconName: 'fa-comment-o',
                        options: this.languages,
-                       helpMessage: gettext("The primary language of the team")
+                       helpMessage: gettext("The language that team members primarily use to communicate with each other.")
                    });
 
                    this.teamCountryField = new FieldViews.DropdownFieldView({
@@ -71,7 +72,7 @@ define(['backbone',
                        bindEvents: false,
                        titleIconName: 'fa-globe',
                        options: this.countries,
-                       helpMessage: gettext("The primary country of the team")
+                       helpMessage: gettext("The country that team members primarily identify with.")
                    });
                },
 
@@ -126,7 +127,7 @@ define(['backbone',
 
                validateTeamData: function (teamName, teamDescription) {
                    var status = true,
-                       message = gettext("We couldn't create your team because something needs to be fixed below.");
+                       message = gettext("Your team could not be created because some required information is missing.");
 
                    this.teamNameField.unhighlightField();
                    this.teamDescriptionField.unhighlightField();
@@ -136,12 +137,16 @@ define(['backbone',
                        this.teamNameField.highlightFieldOnError();
                    } else if (teamName.length > this.maxTeamNameLength) {
                        status = false;
-                       message = gettext("Invalid field value. Ensure this value has at most 255 characters");
+                       message = gettext("The team name cannot have more than 255 characters.");
                        this.teamNameField.highlightFieldOnError();
                    }
 
                    if (_.isEmpty(teamDescription.trim()) ) {
                        status = false;
+                       this.teamDescriptionField.highlightFieldOnError();
+                   } else if (teamDescription.length > this.maxTeamDescriptionLength) {
+                       status = false;
+                       message = gettext("The team description cannot have more than 300 characters.");
                        this.teamDescriptionField.highlightFieldOnError();
                    }
 

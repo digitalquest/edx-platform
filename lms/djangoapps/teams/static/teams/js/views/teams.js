@@ -4,8 +4,8 @@
         'backbone',
         'teams/js/views/team_card',
         'common/js/components/views/paginated_view',
-        'teams/js/views/create_team_button'
-    ], function (Backbone, TeamCardView, PaginatedView, CreateTeamButtonView) {
+        'teams/js/views/team_actions'
+    ], function (Backbone, TeamCardView, PaginatedView, TeamActionsView) {
         var TeamsView = PaginatedView.extend({
             type: 'teams',
 
@@ -21,11 +21,11 @@
             render: function () {
                 PaginatedView.prototype.render.call(this);
 
-                var createTeamButtonView = new CreateTeamButtonView({
+                var teamActionsView = new TeamActionsView({
                     teamParams: _.extend(this.teamParams, {href: Backbone.history.location.href})
                 });
-                this.$el.append(createTeamButtonView.$el);
-                createTeamButtonView.render();
+                this.$el.append(teamActionsView.$el);
+                teamActionsView.render();
 
                 return this;
             }
