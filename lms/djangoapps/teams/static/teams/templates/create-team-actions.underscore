@@ -1,4 +1,0 @@
-<div class="wrapper-create-team-actions">
-    <button class="action-cancel"><%= gettext("Cancel") %><span class="sr"><%- gettext("new team creation") %></span></button>
-    <button class="action-create"><%- gettext("Create") %><span class="sr"><%- gettext("a new team") %></span></button>
-</div>

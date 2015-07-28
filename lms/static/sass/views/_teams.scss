@@ -496,10 +496,6 @@
 
 .teams-content {
 
-  .page-header {
-    border-bottom: 2px solid $m-green-s1;
-  }
-
   .create-new-team {
     padding: $baseline;
     overflow: hidden;
@@ -643,19 +639,9 @@
   }
 }
 
-.page-header-actions {
-  button.action-cancel {
-    @include button-base-sytle($m-gray);
-    @include padding-right($baseline);
-  }
-
-  button.action-create {
-    @include button-base-sytle($white);
-    border-radius: ($baseline/4);
-    background-color: $m-green-s1 !important;
-    height: ($baseline*2);
-    width: 90px;
-  }
+.create-team.form-actions {
+  @include float(left);
+  margin-top: ($baseline*2);
 }
 
 %team-edit-notification-base {

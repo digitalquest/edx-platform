@@ -9,13 +9,15 @@
     </div>
 </div>
 
-<div class="topic-title"><b><%= gettext("Topic: ") %></b><%= topicName %></div>
-<hr class="divider divider-lv1" />
-
 <div class="team-edit-fields">
     <div class="team-required-fields">
     </div>
 
     <div class="team-optional-fields">
     </div>
+</div>
+
+<div class="create-team form-actions">
+    <button class="action action-primary"><%- gettext("Create") %><span class="sr"><%- gettext("a new team") %></span></button>
+    <button class="action action-cancel"><%= gettext("Cancel") %><span class="sr"><%- gettext("new team creation") %></span></button>
 </div>

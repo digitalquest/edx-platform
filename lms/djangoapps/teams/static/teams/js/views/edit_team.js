@@ -13,18 +13,19 @@ define(['backbone',
                maxTeamNameLength: 255,
                maxTeamDescriptionLength: 300,
 
+               events: {
+                   "click .action-primary": "createTeam",
+                   "click .action-cancel": "cancelTeam"
+               },
+
                initialize: function(options) {
                    this.courseId = options.teamParams.courseId;
                    this.teamsUrl = options.teamParams.teamsUrl;
                    this.topicId = options.teamParams.topicId;
-                   this.topicName = options.teamParams.topicName;
                    this.languages = options.teamParams.languages;
                    this.countries = options.teamParams.countries;
 
-                   this.eventAggregator = options.eventAggregator;
                    _.bindAll(this, "cancelTeam", "createTeam");
-                   this.eventAggregator.bind("cancelTeam", this.cancelTeam);
-                   this.eventAggregator.bind("createTeam", this.createTeam);
 
                    this.teamNameField = new FieldViews.TextFieldView({
                        model: new TeamModel(),
@@ -77,7 +78,7 @@ define(['backbone',
                },
 
                render: function() {
-                   this.$el.html(_.template(edit_team_template)({topicName: gettext(this.topicName)}));
+                   this.$el.html(_.template(edit_team_template)({}));
                    this.set(this.teamNameField, '.team-required-fields');
                    this.set(this.teamDescriptionField, '.team-required-fields');
                    this.set(this.optionalDescriptionField, '.team-optional-fields');
@@ -127,26 +128,30 @@ define(['backbone',
 
                validateTeamData: function (teamName, teamDescription) {
                    var status = true,
-                       message = gettext("Your team could not be created because some required information is missing.");
+                       message = '',
+                       messageMissing = gettext("Your team could not be created because some required information is missing."),
+                       messageIncorrect = gettext("Your team could not be created because some required information is incorrect.");
 
                    this.teamNameField.unhighlightField();
                    this.teamDescriptionField.unhighlightField();
 
                    if (_.isEmpty(teamName.trim()) ) {
                        status = false;
+                       message = messageMissing;
                        this.teamNameField.highlightFieldOnError();
                    } else if (teamName.length > this.maxTeamNameLength) {
                        status = false;
-                       message = gettext("The team name cannot have more than 255 characters.");
+                       message = messageIncorrect;
                        this.teamNameField.highlightFieldOnError();
                    }
 
                    if (_.isEmpty(teamDescription.trim()) ) {
                        status = false;
+                       message = messageMissing;
                        this.teamDescriptionField.highlightFieldOnError();
                    } else if (teamDescription.length > this.maxTeamDescriptionLength) {
                        status = false;
-                       message = gettext("The team description cannot have more than 300 characters.");
+                       message = messageIncorrect;
                        this.teamDescriptionField.highlightFieldOnError();
                    }
 

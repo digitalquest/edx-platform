@@ -6,28 +6,19 @@ define(['backbone',
         'gettext',
         'js/components/header/models/header',
         'js/components/header/views/header',
-        'teams/js/views/edit_team',
-        'teams/js/views/create_team_actions'],
-       function (Backbone, _, gettext, HeaderModel, HeaderView, TeamEditView, CreateTeamActionsView) {
+        'teams/js/views/edit_team'],
+       function (Backbone, _, gettext, HeaderModel, HeaderView, TeamEditView) {
            return Backbone.View.extend({
                initialize: function(options) {
 
-                   // Please see `The Event Aggregator` at https://lostechies.com/derickbailey/2011/07/19/references-routing-and-the-event-aggregator-coordinating-views-in-backbone-js/
-                   this.eventAggregator = _.extend({}, Backbone.Events);
-
                    this.headerModel = new HeaderModel({
                        description: gettext("Create a new team if you can't find existing teams to join, or if you would like to learn with friends you know."),
-                       title: gettext("New Team"),
+                       title: gettext("Create a New Team"),
                        breadcrumbs: [{title: options.teamParams.topicName, url: options.teamParams.href}]
                    });
 
                    this.headerView = new HeaderView({
                        model: this.headerModel,
-                       actionsView: new CreateTeamActionsView(
-                           {
-                              eventAggregator: this.eventAggregator
-                           }
-                       ),
 
                        // As per my understanding we don't need this(`events`) but for
                        // whatever reason click on breadcrumb link is not working without this
@@ -40,8 +31,7 @@ define(['backbone',
 
                    this.editView = new TeamEditView({
                        className: 'create-new-team',
-                       teamParams: options.teamParams,
-                       eventAggregator: this.eventAggregator
+                       teamParams: options.teamParams
                    });
                },
 
