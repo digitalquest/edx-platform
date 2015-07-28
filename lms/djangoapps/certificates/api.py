@@ -14,6 +14,7 @@ from opaque_keys.edx.keys import CourseKey
 
 from openedx.core.djangoapps.content.course_overviews.models import CourseOverview
 from xmodule.modulestore.django import modulestore
+from util.organizations_helpers import get_course_organizations
 
 from certificates.models import (
     CertificateStatuses,
@@ -320,24 +321,36 @@ def get_certificate_template(course_key, mode):
     """
     Retrieves the custom certificate template based on course_key and mode.
     """
-    # grab orgnazation_id of the course
-    from get_course_organizations
-    if org_id and course_key and mode:
+    # grab organization of the course
+    course_organization = get_course_organizations(course_key).first()
+
+    if course_organization and mode:
         template = CertificateTemplate.objects.filter(
-            organization_id=org_id,
+            organization_id=course_organization.id,
             course_key=course_key,
             mode=mode
         ).first()
-    elif org_id and course_key:
+    elif mode:
         template = CertificateTemplate.objects.filter(
-            organization_id=org_id,
+            course_key=course_key,
+            mode=mode
+        ).first()
+    elif course_organization and course_key:
+        template = CertificateTemplate.objects.filter(
+            organization_id=course_organization.id,
             course_key=course_key
         ).first()
-    elif org_id:
+    else:
         template = CertificateTemplate.objects.filter(
-            organization_id=org_id
+            course_key=course_key
         ).first()
 
+    # if we have not found any template matching given criteria
+    # then try to find a template matching only course organization
+    if not template:
+        template = CertificateTemplate.objects.filter(
+            organization_id=course_organization.id
+        ).first()
     return template
 
 

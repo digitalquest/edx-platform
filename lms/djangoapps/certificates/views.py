@@ -616,7 +616,7 @@ def render_html_view(request, user_id, course_id):
 
     # FINALLY, generate and send the output the client
     if settings.FEATURES.get('CUSTOM_CERTIFICATE_TEMPLATE_ENABLED', False):
-        custom_template = get_certificate_template(org, course_key, user_certificate.mode)
+        custom_template = get_certificate_template(course_key, user_certificate.mode)
         if custom_template:
             template = Template(custom_template)
             return template.render(context)
