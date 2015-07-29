@@ -156,6 +156,7 @@
         FieldViews.EditableFieldView = FieldViews.FieldView.extend({
 
             initialize: function (options) {
+                this.persistChanges = _.isUndefined(options.persistChanges) ? false : options.persistChanges;
                 _.bindAll(this, 'saveAttributes', 'saveSucceeded', 'showDisplayMode', 'showEditMode',
                     'startEditing', 'finishEditing'
                 );
@@ -218,19 +219,23 @@
             },
 
             startEditing: function () {
-                if (this.editable === 'toggle' && this.mode !== 'edit') {
-                    this.showEditMode(true);
+                if (this.persistChanges === true) {
+                    if (this.editable === 'toggle' && this.mode !== 'edit') {
+                        this.showEditMode(true);
+                    }
                 }
             },
 
             finishEditing: function() {
-                if (this.fieldValue() !== this.modelValue()) {
-                    this.saveValue();
-                } else {
-                    if (this.editable === 'always') {
-                        this.showEditMode(true);
+                if (this.persistChanges === true) {
+                    if (this.fieldValue() !== this.modelValue()) {
+                        this.saveValue();
                     } else {
-                        this.showDisplayMode(true);
+                        if (this.editable === 'always') {
+                            this.showEditMode(true);
+                        } else {
+                            this.showDisplayMode(true);
+                        }
                     }
                 }
             },
@@ -283,20 +288,11 @@
 
             fieldTemplate: field_text_template,
 
-            events: function () {
-                var events_hash = {
-                    'change input': 'saveValue'
-                };
-
-                if(this.bindEvents || _.isUndefined(this.bindEvents)) {
-                    return events_hash;
-                } else {
-                    return {};
-                }
+            events: {
+                'change input': 'saveValue'
             },
 
             initialize: function (options) {
-                this.bindEvents = options.bindEvents;
                 this._super(options);
                 _.bindAll(this, 'render', 'fieldValue', 'updateValueInField', 'saveValue');
                 this.listenTo(this.model, "change:" + this.options.valueAttribute, this.updateValueInField);
@@ -323,9 +319,11 @@
             },
 
             saveValue: function () {
-                var attributes = {};
-                attributes[this.options.valueAttribute] = this.fieldValue();
-                this.saveAttributes(attributes);
+                if (this.persistChanges === true) {
+                    var attributes = {};
+                    attributes[this.options.valueAttribute] = this.fieldValue();
+                    this.saveAttributes(attributes);
+                }
             }
         });
 
@@ -335,22 +333,13 @@
 
             fieldTemplate: field_dropdown_template,
 
-            events: function () {
-                var events_hash = {
-                    'click': 'startEditing',
-                    'change select': 'finishEditing',
-                    'focusout select': 'finishEditing'
-                };
-
-                if(this.bindEvents || _.isUndefined(this.bindEvents)) {
-                    return events_hash;
-                } else {
-                    return {};
-                }
+            events: {
+                'click': 'startEditing',
+                'change select': 'finishEditing',
+                'focusout select': 'finishEditing'
             },
 
             initialize: function (options) {
-                this.bindEvents = options.bindEvents;
                 _.bindAll(this, 'render', 'optionForValue', 'fieldValue', 'displayValue', 'updateValueInField', 'saveValue');
                 this._super(options);
 
@@ -463,27 +452,18 @@
 
             fieldTemplate: field_textarea_template,
 
-            events: function () {
-                var events_hash = {
-                    'click .wrapper-u-field': 'startEditing',
-                    'click .u-field-placeholder': 'startEditing',
-                    'focusout textarea': 'finishEditing',
-                    'change textarea': 'adjustTextareaHeight',
-                    'keyup textarea': 'adjustTextareaHeight',
-                    'keydown textarea': 'onKeyDown',
-                    'paste textarea': 'adjustTextareaHeight',
-                    'cut textarea': 'adjustTextareaHeight'
-                };
-
-                if(this.bindEvents || _.isUndefined(this.bindEvents)) {
-                    return events_hash;
-                } else {
-                    return {};
-                }
+            events: {
+                'click .wrapper-u-field': 'startEditing',
+                'click .u-field-placeholder': 'startEditing',
+                'focusout textarea': 'finishEditing',
+                'change textarea': 'adjustTextareaHeight',
+                'keyup textarea': 'adjustTextareaHeight',
+                'keydown textarea': 'onKeyDown',
+                'paste textarea': 'adjustTextareaHeight',
+                'cut textarea': 'adjustTextareaHeight'
             },
 
             initialize: function (options) {
-                this.bindEvents = options.bindEvents;
                 _.bindAll(this, 'render', 'onKeyDown', 'adjustTextareaHeight', 'fieldValue', 'saveValue', 'updateView');
                 this._super(options);
                 this.listenTo(this.model, "change:" + this.options.valueAttribute, this.updateView);
@@ -513,17 +493,21 @@
             },
 
             onKeyDown: function (event) {
-                if (event.keyCode === 13) {
-                    event.preventDefault();
-                    this.finishEditing(event);
-                } else {
-                    this.adjustTextareaHeight();
+                if (this.persistChanges === true) {
+                    if (event.keyCode === 13) {
+                        event.preventDefault();
+                        this.finishEditing(event);
+                    } else {
+                        this.adjustTextareaHeight();
+                    }
                 }
             },
 
             adjustTextareaHeight: function() {
-                var textarea = this.$('textarea');
-                textarea.css('height', 'auto').css('height', textarea.prop('scrollHeight') + 10);
+                if (this.persistChanges === true) {
+                    var textarea = this.$('textarea');
+                    textarea.css('height', 'auto').css('height', textarea.prop('scrollHeight') + 10);
+                }
             },
 
             modelValue: function() {

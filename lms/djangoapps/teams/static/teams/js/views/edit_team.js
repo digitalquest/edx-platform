@@ -31,7 +31,6 @@ define(['backbone',
                        model: new TeamModel(),
                        title: gettext("Team Name (Required) *"),
                        valueAttribute: 'name',
-                       bindEvents: false,
                        helpMessage: gettext("A name that identifies your team (maximum 255 characters).")
                    });
 
@@ -41,7 +40,6 @@ define(['backbone',
                        valueAttribute: 'description',
                        editable: 'always',
                        showMessages: false,
-                       bindEvents: false,
                        descriptionMessage: gettext("A short description of the team to help other learners understand the goals or direction of the team (maximum 300 characters).")
                    });
 
@@ -58,7 +56,6 @@ define(['backbone',
                        valueAttribute: 'language',
                        required: false,
                        showMessages: false,
-                       bindEvents: false,
                        titleIconName: 'fa-comment-o',
                        options: this.languages,
                        helpMessage: gettext("The language that team members primarily use to communicate with each other.")
@@ -70,7 +67,6 @@ define(['backbone',
                        valueAttribute: 'country',
                        required: false,
                        showMessages: false,
-                       bindEvents: false,
                        titleIconName: 'fa-globe',
                        options: this.countries,
                        helpMessage: gettext("The country that team members primarily identify with.")

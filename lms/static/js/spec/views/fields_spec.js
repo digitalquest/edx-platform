@@ -110,7 +110,8 @@ define(['backbone', 'jquery', 'underscore', 'common/js/spec_helpers/ajax_helpers
                 var fieldData = FieldViewsSpecHelpers.createFieldData(FieldViews.TextFieldView, {
                     title: 'Full Name',
                     valueAttribute: 'name',
-                    helpMessage: 'How are you?'
+                    helpMessage: 'How are you?',
+                    persistChanges: true
                 });
                 var view = new FieldViews.TextFieldView(fieldData).render();
 
@@ -134,7 +135,8 @@ define(['backbone', 'jquery', 'underscore', 'common/js/spec_helpers/ajax_helpers
                     title: 'Full Name',
                     valueAttribute: 'name',
                     helpMessage: 'edX full name',
-                    editable: 'never'
+                    editable: 'never',
+                    persistChanges: true
 
                 });
                 var view = new FieldViews.DropdownFieldView(fieldData).render();
@@ -154,7 +156,8 @@ define(['backbone', 'jquery', 'underscore', 'common/js/spec_helpers/ajax_helpers
                 var fieldData = FieldViewsSpecHelpers.createFieldData(FieldViews.DropdownFieldView, {
                     title: 'Full Name',
                     valueAttribute: 'name',
-                    helpMessage: 'edX full name'
+                    helpMessage: 'edX full name',
+                    persistChanges: true
                 });
                 var view = new FieldViews.DropdownFieldView(fieldData).render();
 
@@ -178,7 +181,8 @@ define(['backbone', 'jquery', 'underscore', 'common/js/spec_helpers/ajax_helpers
                     title: 'Full Name',
                     valueAttribute: 'name',
                     helpMessage: 'edX full name',
-                    editable: 'toggle'
+                    editable: 'toggle',
+                    persistChanges: true
                 });
                 var view = new FieldViews.DropdownFieldView(fieldData).render();
 
@@ -205,7 +209,8 @@ define(['backbone', 'jquery', 'underscore', 'common/js/spec_helpers/ajax_helpers
                         valueAttribute: 'drop-down',
                         helpMessage: 'edX drop down',
                         editable: editable,
-                        required:true
+                        required:true,
+                        persistChanges: true
                     });
                     var view = new FieldViews.DropdownFieldView(fieldData).render();
 
@@ -230,7 +235,8 @@ define(['backbone', 'jquery', 'underscore', 'common/js/spec_helpers/ajax_helpers
                     helpMessage: 'Wicked is good',
                     placeholderValue: "Tell other edX learners a little about yourself: where you live, " +
                         "what your interests are, why you’re taking courses on edX, or what you hope to learn.",
-                    editable: 'never'
+                    editable: 'never',
+                    persistChanges: true
                 });
 
                 // set bio to empty to see the placeholder.
@@ -259,7 +265,8 @@ define(['backbone', 'jquery', 'underscore', 'common/js/spec_helpers/ajax_helpers
                     helpMessage: 'Wicked is good',
                     placeholderValue: "Tell other edX learners a little about yourself: where you live, " +
                         "what your interests are, why you’re taking courses on edX, or what you hope to learn.",
-                    editable: 'toggle'
+                    editable: 'toggle',
+                    persistChanges: true
 
                 });
                 fieldData.model.set({'bio': ''});
