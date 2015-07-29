@@ -38,7 +38,7 @@ class VerificationPartitionScheme(object):
         """
         Returns the key to use to look up and save the user's group for a given user partition.
         """
-        return 'incourse.verification.partition_{0}'.format(xblock_location_id)
+        return 'verification:{0}'.format(xblock_location_id)
 
     def _is_enrolled_in_verified_mode(self, user, course_key):
         pass
