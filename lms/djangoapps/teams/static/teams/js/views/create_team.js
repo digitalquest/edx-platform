@@ -36,6 +36,7 @@ define(['backbone',
                    this.headerView.render();
                    this.$el.append(this.editView.$el);
                    this.editView.render();
+                   return this;
                }
            });
        });

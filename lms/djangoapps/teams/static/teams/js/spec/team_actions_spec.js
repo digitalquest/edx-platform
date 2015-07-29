@@ -1,9 +1,8 @@
 define([
     'jquery',
     'backbone',
-    'common/js/spec_helpers/ajax_helpers',
     'teams/js/views/team_actions'
-], function ($, Backbone, AjaxHelpers, TeamActionsView) {
+], function ($, Backbone, TeamActionsView) {
     'use strict';
 
     describe('TeamActions', function () {
@@ -18,7 +17,7 @@ define([
             }).render();
         });
 
-        it('can itself correctly', function () {
+        it('can render itself correctly', function () {
             expect(teamActionsView.$('.title').text()).toBe('Are you having trouble finding a team to join?');
             expect(teamActionsView.$('.copy').text()).toBe(
                 "Try browsing all teams or searching team descriptions. If you " +
