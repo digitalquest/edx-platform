@@ -462,15 +462,16 @@ class ExportTestCase(CourseTestCase):
         name = library.url_name
 
         # import the library
-        extract_dir = path(tempfile.mkdtemp())
+        extract_dir = path(tempfile.mkdtemp(dir=settings.DATA_DIR))
+        extract_dir_relative = path.relpath(extract_dir, settings.DATA_DIR)
         try:
-            tar = tarfile.open(path(TEST_DATA_DIR) / 'imports' / 'library.HhJfPD.tar.gz')
-            safetar_extractall(tar, extract_dir)
+            with tarfile.open(path(TEST_DATA_DIR) / 'imports' / 'library.HhJfPD.tar.gz') as tar:
+                safetar_extractall(tar, extract_dir)
             library_items = import_library_from_xml(
                 self.store,
                 self.user.id,
                 settings.GITHUB_REPO_ROOT,
-                [extract_dir / 'library'],
+                [extract_dir_relative / 'library'],
                 load_error_modules=False,
                 static_content_store=contentstore(),
                 target_id=lib_key
