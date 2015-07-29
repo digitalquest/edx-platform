@@ -1,13 +1,24 @@
 define([
     'jquery',
+    'underscore',
     'backbone',
     'common/js/spec_helpers/ajax_helpers',
     'teams/js/views/edit_team'
-], function ($, Backbone, AjaxHelpers, TeamEditView) {
+], function ($, _, Backbone, AjaxHelpers, TeamEditView) {
     'use strict';
 
     describe('EditTeam', function () {
-        var teamEditView;
+        var teamEditView,
+            verifyValidation = function (fieldsData) {
+                _.each(fieldsData, function (fieldData) {
+                    teamEditView.$(fieldData[0]).val(fieldData[1]);
+                });
+                teamEditView.$('.create-team.form-actions .action-primary').click();
+                expect(teamEditView.$('.wrapper-msg').is(':visible')).toBeTruthy();
+                expect(teamEditView.$('.wrapper-msg .title').text().trim()).toBe("Oops!");
+                var errorMessage = "Your team could not be created. Check the highlighted fields below and try again.";
+                expect(teamEditView.$('.wrapper-msg .copy').text().trim()).toBe(errorMessage);
+            };
 
         beforeEach(function () {
             setFixtures('<div class="teams-content"></div>');
@@ -51,13 +62,41 @@ define([
             expect(Backbone.history.navigate.calls[0].args).toContain('topics/awesomeness');
         });
 
-        it('shows validation error message', function () {
-            teamEditView.$('.create-team.form-actions .action-primary').click();
+        it('shows validation error message when field is empty', function () {
+            verifyValidation([
+                ['.u-field-name input', 'Name'],
+                ['.u-field-textarea textarea', '']
+            ]);
+            teamEditView.$('.wrapper-msg').hide();
+            verifyValidation([
+                ['.u-field-name input', ''],
+                ['.u-field-textarea textarea', 'description']
+            ]);
+            teamEditView.$('.wrapper-msg').hide();
+            verifyValidation([
+                ['.u-field-name input', ''],
+                ['.u-field-textarea textarea', '']
+            ]);
+        });
 
-            expect(teamEditView.$('.wrapper-msg').is(':visible')).toBeTruthy();
-            expect(teamEditView.$('.wrapper-msg .title').text().trim()).toBe("Oops!");
-            var errorMessage = "Your team could not be created. Check the highlighted fields below and try again.";
-            expect(teamEditView.$('.wrapper-msg .copy').text().trim()).toBe(errorMessage);
+        it('shows validation error message when field value length exceeded the limit', function () {
+            var teamName = new Array(500 + 1).join( '$' );
+            var teamDescription = new Array(500 + 1).join( '$' );
+
+            verifyValidation([
+                ['.u-field-name input', teamName],
+                ['.u-field-textarea textarea', 'description']
+            ]);
+            teamEditView.$('.wrapper-msg').hide();
+            verifyValidation([
+                ['.u-field-name input', 'name'],
+                ['.u-field-textarea textarea', teamDescription]
+            ]);
+            teamEditView.$('.wrapper-msg').hide();
+            verifyValidation([
+                ['.u-field-name input', teamName],
+                ['.u-field-textarea textarea', teamDescription]
+            ]);
         });
 
         it("shows an error message for HTTP 500", function () {

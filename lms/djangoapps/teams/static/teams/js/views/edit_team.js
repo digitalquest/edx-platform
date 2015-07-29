@@ -15,7 +15,7 @@ define(['backbone',
 
                events: {
                    "click .action-primary": "createTeam",
-                   "click .action-cancel": "cancelTeam"
+                   "click .action-cancel": "goBackToTopic"
                },
 
                initialize: function(options) {
@@ -25,7 +25,7 @@ define(['backbone',
                    this.languages = options.teamParams.languages;
                    this.countries = options.teamParams.countries;
 
-                   _.bindAll(this, "cancelTeam", "createTeam");
+                   _.bindAll(this, "goBackToTopic", "createTeam");
 
                    this.teamNameField = new FieldViews.TextFieldView({
                        model: new TeamModel(),
@@ -94,12 +94,6 @@ define(['backbone',
                    var teamLanguage = this.teamLanguageField.fieldValue();
                    var teamCountry = this.teamCountryField.fieldValue();
 
-                   var validation = this.validateTeamData(teamName, teamDescription);
-                   if (validation.status === false) {
-                       this.showMessage(validation.message);
-                       return;
-                   }
-
                    var data = {
                        course_id: this.courseId,
                        topic_id: this.topicId,
@@ -109,6 +103,12 @@ define(['backbone',
                        country: _.isNull(teamCountry) ? '' : teamCountry
                    };
 
+                   var validationResult = this.validateTeamData(data);
+                   if (validationResult.status === false) {
+                       this.showMessage(validationResult.message);
+                       return;
+                   }
+
                    // Send AJAX request to Teams API
                    var view = this;
                    $.ajax({
@@ -116,31 +116,31 @@ define(['backbone',
                        url: this.teamsUrl,
                        data: data
                    }).done(function () {
-                       Backbone.history.navigate("topics/" + view.topicId, {trigger: true});
+                       view.goBackToTopic();
                    }).fail(function (jqXHR) {
                        view.showMessage(gettext('An error occurred. Please try again.'));
                    });
                },
 
-               validateTeamData: function (teamName, teamDescription) {
+               validateTeamData: function (data) {
                    var status = true,
                        message = gettext("Your team could not be created. Check the highlighted fields below and try again.");
 
                    this.teamNameField.unhighlightField();
                    this.teamDescriptionField.unhighlightField();
 
-                   if (_.isEmpty(teamName.trim()) ) {
+                   if (_.isEmpty(data.name.trim()) ) {
                        status = false;
                        this.teamNameField.highlightFieldOnError();
-                   } else if (teamName.length > this.maxTeamNameLength) {
+                   } else if (data.name.length > this.maxTeamNameLength) {
                        status = false;
                        this.teamNameField.highlightFieldOnError();
                    }
 
-                   if (_.isEmpty(teamDescription.trim()) ) {
+                   if (_.isEmpty(data.description.trim()) ) {
                        status = false;
                        this.teamDescriptionField.highlightFieldOnError();
-                   } else if (teamDescription.length > this.maxTeamDescriptionLength) {
+                   } else if (data.description.length > this.maxTeamDescriptionLength) {
                        status = false;
                        this.teamDescriptionField.highlightFieldOnError();
                    }
@@ -156,7 +156,7 @@ define(['backbone',
                    this.$('.msg-content .copy p').text(message);
                },
 
-               cancelTeam: function () {
+               goBackToTopic: function () {
                    Backbone.history.navigate("topics/" + this.topicId, {trigger: true});
                }
            });
