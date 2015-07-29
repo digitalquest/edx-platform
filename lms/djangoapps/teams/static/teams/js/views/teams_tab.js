@@ -12,9 +12,11 @@
             'teams/js/collections/topic',
             'teams/js/views/teams',
             'teams/js/collections/team',
+            'teams/js/views/team_actions',
             'text!teams/templates/teams_tab.underscore'],
            function (Backbone, _, gettext, HeaderView, HeaderModel, TabbedView,
-                     TopicsView, TopicModel, TopicCollection, TeamsView, TeamCollection, teamsTemplate) {
+                     TopicsView, TopicModel, TopicCollection, TeamsView, TeamCollection,
+                     TeamActionsView, teamsTemplate) {
                var ViewWithHeader = Backbone.View.extend({
                    initialize: function (options) {
                        this.header = options.header;
@@ -48,6 +50,7 @@
                        _.each([
                            [':default', _.bind(this.routeNotFound, this)],
                            ['topics/:topic_id', _.bind(this.browseTopic, this)],
+                           ['topics/:topic_id/create_new_team(/)', _.bind(this.newTeam, this)],
                            [new RegExp('^(browse)$'), _.bind(this.goToTab, this)],
                            [new RegExp('^(teams)$'), _.bind(this.goToTab, this)]
                        ], function (route) {
@@ -96,6 +99,18 @@
                        this.mainView.setElement(this.$el).render();
                        this.hideWarning();
                        return this;
+                   },
+
+                   /**
+                    * Render the create new team form.
+                    */
+                   newTeam: function (topicId) {
+                       this.getTeamsView(topicId).done(function (teamsView) {
+                           var view = new TeamActionsView({
+                               teamParams: teamsView.main.teamParams
+                           });
+                           view.renderTeamForm();
+                       });
                    },
 
                    /**

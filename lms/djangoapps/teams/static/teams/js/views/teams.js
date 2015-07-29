@@ -22,7 +22,7 @@
                 PaginatedView.prototype.render.call(this);
 
                 var teamActionsView = new TeamActionsView({
-                    teamParams: _.extend(this.teamParams, {href: Backbone.history.location.href})
+                    teamParams: this.teamParams
                 });
                 this.$el.append(teamActionsView.$el);
                 teamActionsView.render();

@@ -1,4 +1,4 @@
 <div class="add-team">
-  <h3 class="title">Are you having trouble finding a team to join?</h3>
-  <p class="copy">Try <a class="browse-teams" href="">browsing all teams</a> or <a class="search-team-descriptions" href="">searching team descriptions</a>. If you still can't find a team to join, <a class="create-team" href="">create a new team in this topic</a>.</p>
+  <h3 class="title"><%= gettext("Are you having trouble finding a team to join?") %></h3>
+  <p class="copy"><%= gettext("Try") %> <a class="browse-teams" href=""><%= gettext("browsing all teams") %></a> <%= gettext("or") %> <a class="search-team-descriptions" href=""><%= gettext("searching team descriptions") %></a>. <%= gettext("If you still can't find a team to join") %>, <a class="create-team" href=""><%= gettext("create a new team in this topic") %></a>.</p>
 </div>

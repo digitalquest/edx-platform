@@ -49,7 +49,7 @@ define(['backbone',
                        model: new TeamModel(),
                        title: gettext("Optional Characteristics"),
                        valueAttribute: 'optional_description',
-                       helpMessage: gettext("Help other learners decide whether to join your team by specifying some characteristics for your team. Choose carefully, because fewer people might be interested in joining your team if it seems too restrictive.")
+                       helpMessage: gettext("Help other learners decide whether to join your team by specifying some characteristics for your team. Choose carefully, because fewer people might be interested in joining your team if it seems too restrictive. You cannot change these characteristics after you create the team.")
                    });
 
                    this.teamLanguageField = new FieldViews.DropdownFieldView({
@@ -120,7 +120,7 @@ define(['backbone',
                        url: this.teamsUrl,
                        data: data
                    }).done(function () {
-                       Backbone.history.loadUrl(Backbone.history.fragment);
+                       Backbone.history.navigate("topics/" + view.topicId, {trigger: true});
                    }).fail(function (jqXHR) {
                        view.showMessage(gettext('An error occurred. Please try again.'));
                    });
@@ -128,30 +128,24 @@ define(['backbone',
 
                validateTeamData: function (teamName, teamDescription) {
                    var status = true,
-                       message = '',
-                       messageMissing = gettext("Your team could not be created because some required information is missing."),
-                       messageIncorrect = gettext("Your team could not be created because some required information is incorrect.");
+                       message = gettext("Your team could not be created. Check the highlighted fields below and try again.");
 
                    this.teamNameField.unhighlightField();
                    this.teamDescriptionField.unhighlightField();
 
                    if (_.isEmpty(teamName.trim()) ) {
                        status = false;
-                       message = messageMissing;
                        this.teamNameField.highlightFieldOnError();
                    } else if (teamName.length > this.maxTeamNameLength) {
                        status = false;
-                       message = messageIncorrect;
                        this.teamNameField.highlightFieldOnError();
                    }
 
                    if (_.isEmpty(teamDescription.trim()) ) {
                        status = false;
-                       message = messageMissing;
                        this.teamDescriptionField.highlightFieldOnError();
                    } else if (teamDescription.length > this.maxTeamDescriptionLength) {
                        status = false;
-                       message = messageIncorrect;
                        this.teamDescriptionField.highlightFieldOnError();
                    }
 
@@ -167,7 +161,7 @@ define(['backbone',
                },
 
                cancelTeam: function () {
-                   Backbone.history.loadUrl(Backbone.history.fragment);
+                   Backbone.history.navigate("topics/" + this.topicId, {trigger: true});
                }
            });
        });

@@ -22,12 +22,12 @@
                 return this;
             },
 
-            browseTeams: function () {
+            browseTeams: function (event) {
                 event.preventDefault();
                 Backbone.history.navigate('browse', {trigger: true});
             },
 
-            searchTeamDescriptions: function () {
+            searchTeamDescriptions: function (event) {
                 event.preventDefault();
                 // TODO! Will navigate to correct place once required functionality is available
                 Backbone.history.navigate('browse', {trigger: true});
@@ -35,11 +35,16 @@
 
             showCreateTeamForm: function (event) {
                 event.preventDefault();
+                this.renderTeamForm();
+            },
+
+            renderTeamForm: function () {
                 var view = new CreateTeamView({
                     el: $('.teams-content'),
-                    teamParams: _.extend(this.teamParams, {href: Backbone.history.location.href})
+                    teamParams: this.teamParams
                 });
                 view.render();
+                Backbone.history.navigate('topics/' + this.teamParams.topicId + '/create_new_team', {replace: true});
             }
         });
     });

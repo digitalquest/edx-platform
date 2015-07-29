@@ -50,7 +50,7 @@
 
             initialize: function () {
 
-                this.template = _.template(this.fieldTemplate);
+                this.template = _.template(this.fieldTemplate || '');
 
                 this.helpMessage = this.options.helpMessage || '';
                 this.showMessages = _.isUndefined(this.options.showMessages) ? true : this.options.showMessages;
