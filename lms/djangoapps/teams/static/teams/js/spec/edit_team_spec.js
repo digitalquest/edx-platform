@@ -76,5 +76,14 @@ define([
             teamEditView.$('.create-team.form-actions .action-cancel').click();
             expect(Backbone.history.navigate.calls[0].args).toContain('topics/awesomeness');
         });
+
+        it("only highlight fields with errors", function () {
+            teamEditView.$('.u-field-name input').val('TeamName');
+            teamEditView.$('.create-team.form-actions .action-primary').click();
+
+            expect(teamEditView.$('.u-field-description.error').length).toBe(1);
+            expect(teamEditView.$('.u-field-name.error').length).toBe(0);
+        });
+
     });
 });
