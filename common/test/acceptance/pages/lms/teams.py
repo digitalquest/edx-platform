@@ -175,8 +175,8 @@ class CreateTeamPage(CoursePage, FieldsMixin):
 
     def create_team(self):
         """Click on create team button"""
-        self.q(css='.action-create').click()
+        self.q(css='.create-team .action-primary').click()
 
     def cancel_team(self):
         """Click on cancel team button"""
-        self.q(css='.action-cancel').click()
+        self.q(css='.create-team .action-cancel').click()

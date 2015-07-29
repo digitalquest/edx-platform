@@ -497,6 +497,7 @@ class CreateTeamTest(TeamsTabBase):
         self.set_team_configuration({'course_id': self.course_id, 'max_team_size': 10, 'topics': [self.topic]})
         self.browse_teams_page = BrowseTeamsPage(self.browser, self.course_id, self.topic)
         self.browse_teams_page.visit()
+        self.browse_teams_page.is_browser_on_page()
         self.create_team_page = CreateTeamPage(self.browser, self.course_id, self.topic)
 
     def verify_page_header(self):
@@ -504,7 +505,7 @@ class CreateTeamTest(TeamsTabBase):
         Verify that the page header correctly reflects the
         create team header, description and breadcrumb.
         """
-        self.assertEqual(self.create_team_page.header_page_name, 'New Team')
+        self.assertEqual(self.create_team_page.header_page_name, 'Create a New Team')
         self.assertEqual(
             self.create_team_page.header_page_description,
             'Create a new team if you can\'t find existing teams to join, '
@@ -524,8 +525,7 @@ class CreateTeamTest(TeamsTabBase):
         self.create_team_page.value_for_text_field(field_id='name', value='Avengers')
         self.create_team_page.value_for_textarea_field(
             field_id='description',
-            value='The Avengers are a fictional team of superheroes appearing '
-                  'in American comic books published by Marvel Comics.'
+            value='The Avengers are a fictional team of superheroes.'
         )
         self.create_team_page.value_for_dropdown_field(field_id='language', value='English')
         self.create_team_page.value_for_dropdown_field(field_id='country', value='Pakistan')
@@ -569,7 +569,7 @@ class CreateTeamTest(TeamsTabBase):
 
         self.assertEqual(
             self.create_team_page.validation_message_text,
-            'Your team could not be created because some required information is missing.'
+            'Your team could not be created. Check the highlighted fields below and try again.'
         )
 
     def test_user_can_see_error_message_for_incorrect_data(self):
@@ -603,7 +603,7 @@ class CreateTeamTest(TeamsTabBase):
 
         self.assertEqual(
             self.create_team_page.validation_message_text,
-            'Your team could not be created because some required information is missing.'
+            'Your team could not be created. Check the highlighted fields below and try again.'
         )
 
     def test_user_can_create_new_team_successfully(self):
@@ -626,6 +626,13 @@ class CreateTeamTest(TeamsTabBase):
         self.browse_teams_page.is_browser_on_page()
 
         self.assertEqual(self.browse_teams_page.get_pagination_header_text(), 'Showing 1 out of 1 total')
+        # Verify the newly created team content.
+        team_card = self.browse_teams_page.team_cards.results[0]
+        self.assertEqual(team_card.find_element_by_css_selector('.card-title').text, 'Avengers')
+        self.assertEqual(
+            team_card.find_element_by_css_selector('.card-description').text,
+            'The Avengers are a fictional team of superheroes.'
+        )
 
     def test_user_can_cancel_the_team_creation(self):
         """
