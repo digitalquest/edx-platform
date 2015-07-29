@@ -12,11 +12,11 @@
             'teams/js/collections/topic',
             'teams/js/views/teams',
             'teams/js/collections/team',
-            'teams/js/views/team_actions',
+            'teams/js/views/create_team',
             'text!teams/templates/teams_tab.underscore'],
            function (Backbone, _, gettext, HeaderView, HeaderModel, TabbedView,
                      TopicsView, TopicModel, TopicCollection, TeamsView, TeamCollection,
-                     TeamActionsView, teamsTemplate) {
+                     CreateTeamView, teamsTemplate) {
                var ViewWithHeader = Backbone.View.extend({
                    initialize: function (options) {
                        this.header = options.header;
@@ -105,11 +105,12 @@
                     * Render the create new team form.
                     */
                    newTeam: function (topicId) {
+                       var self = this;
                        this.getTeamsView(topicId).done(function (teamsView) {
-                           var view = new TeamActionsView({
-                               teamParams: teamsView.main.teamParams
+                           self.mainView = new CreateTeamView({
+                                teamParams: teamsView.main.teamParams
                            });
-                           view.renderTeamForm();
+                           self.render();
                        });
                    },
 

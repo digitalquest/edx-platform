@@ -35,16 +35,12 @@
 
             showCreateTeamForm: function (event) {
                 event.preventDefault();
-                this.renderTeamForm();
-            },
-
-            renderTeamForm: function () {
                 var view = new CreateTeamView({
                     el: $('.teams-content'),
                     teamParams: this.teamParams
                 });
                 view.render();
-                Backbone.history.navigate('topics/' + this.teamParams.topicId + '/create_new_team', {replace: true});
+                Backbone.history.navigate('topics/' + this.teamParams.topicId + '/create_new_team', {trigger: true});
             }
         });
     });

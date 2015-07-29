@@ -26,7 +26,6 @@
                 });
                 this.$el.append(teamActionsView.$el);
                 teamActionsView.render();
-
                 return this;
             }
         });
