@@ -321,37 +321,25 @@ def get_certificate_template(course_key, mode):
     """
     Retrieves the custom certificate template based on course_key and mode.
     """
-    # grab organization of the course
-    course_organization = get_course_organizations(course_key).first()
+    org_id, template = None, None
+    # fetch organization of the course
+    course_organization = get_course_organizations(course_key)
+    if course_organization:
+        org_id = course_organization[0]['id']
 
-    if course_organization and mode:
+    if org_id and mode:
         template = CertificateTemplate.objects.filter(
-            organization_id=course_organization.id,
+            organization_id=org_id,
             course_key=course_key,
             mode=mode
-        ).first()
-    elif mode:
+        )
+    if not template and mode:
         template = CertificateTemplate.objects.filter(
-            course_key=course_key,
+            organization_id=org_id,
             mode=mode
-        ).first()
-    elif course_organization and course_key:
-        template = CertificateTemplate.objects.filter(
-            organization_id=course_organization.id,
-            course_key=course_key
-        ).first()
-    else:
-        template = CertificateTemplate.objects.filter(
-            course_key=course_key
-        ).first()
+        )
 
-    # if we have not found any template matching given criteria
-    # then try to find a template matching only course organization
-    if not template:
-        template = CertificateTemplate.objects.filter(
-            organization_id=course_organization.id
-        ).first()
-    return template
+    return template[0].template if template else None
 
 
 def emit_certificate_event(event_name, user, course_id, course=None, event_data=None):
