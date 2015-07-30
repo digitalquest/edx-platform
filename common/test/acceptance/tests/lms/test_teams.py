@@ -457,7 +457,7 @@ class BrowseTeamsWithinTopicTest(TeamsTabBase):
             '1 / 10 Members'
         )
 
-    def test_navigation_links_are_working_properly(self):
+    def test_navigation_links(self):
         """
         Scenario: User should be able to navigate to "browse all teams" and "search team description" links.
         Given I am enrolled in a course with a team configuration and a topic
@@ -474,13 +474,13 @@ class BrowseTeamsWithinTopicTest(TeamsTabBase):
         self.browse_teams_page.visit()
         self.verify_page_header()
 
-        self.assertTrue(self.browse_teams_page.browse_all_teams_link_present())
+        self.browse_teams_page.wait_for_action_links_tobe_present()
         self.browse_teams_page.click_browse_all_teams_link()
-        self.topics_page.is_browser_on_page()
+        self.assertTrue(self.topics_page.is_browser_on_page())
 
         self.browse_teams_page.visit()
         self.verify_page_header()
-        self.assertTrue(self.browse_teams_page.search_team_link_present())
+        self.browse_teams_page.wait_for_action_links_tobe_present()
         self.browse_teams_page.click_search_team_link()
         # TODO Add search page expectation once that implemented.
 
@@ -493,12 +493,12 @@ class CreateTeamTest(TeamsTabBase):
 
     def setUp(self):
         super(CreateTeamTest, self).setUp()
-        self.topic = {u"name": u"Example Topic", u"id": "example_topic", u"description": "Description"}
+        self.topic = {'name': 'Example Topic', 'id': 'example_topic', 'description': 'Description'}
         self.set_team_configuration({'course_id': self.course_id, 'max_team_size': 10, 'topics': [self.topic]})
         self.browse_teams_page = BrowseTeamsPage(self.browser, self.course_id, self.topic)
         self.browse_teams_page.visit()
-        self.browse_teams_page.is_browser_on_page()
         self.create_team_page = CreateTeamPage(self.browser, self.course_id, self.topic)
+        self.team_name = 'Avengers'
 
     def verify_page_header(self):
         """
@@ -511,18 +511,18 @@ class CreateTeamTest(TeamsTabBase):
             'Create a new team if you can\'t find existing teams to join, '
             'or if you would like to learn with friends you know.'
         )
-        self.assertEqual(self.create_team_page.header_page_breadcrumbs, 'Example Topic')
+        self.assertEqual(self.create_team_page.header_page_breadcrumbs, self.topic['name'])
 
     def verify_and_navigate_to_create_team_page(self):
         """Navigates to the create team page and verifies."""
-        self.create_team_page.wait_for_ajax()
-        self.assertTrue(self.browse_teams_page.create_team_link_present())
+        self.assertTrue(self.browse_teams_page.is_browser_on_page())
+        self.browse_teams_page.wait_for_action_links_tobe_present()
         self.browse_teams_page.click_create_team_link()
         self.verify_page_header()
 
     def fill_create_form(self):
         """Fill the create team form fields with appropriate values."""
-        self.create_team_page.value_for_text_field(field_id='name', value='Avengers')
+        self.create_team_page.value_for_text_field(field_id='name', value=self.team_name)
         self.create_team_page.value_for_textarea_field(
             field_id='description',
             value='The Avengers are a fictional team of superheroes.'
@@ -547,6 +547,11 @@ class CreateTeamTest(TeamsTabBase):
             'A name that identifies your team (maximum 255 characters).'
         )
         self.assertEqual(
+            self.create_team_page.message_for_textarea_field('description'),
+            'A short description of the team to help other learners understand '
+            'the goals or direction of the team (maximum 300 characters).'
+        )
+        self.assertEqual(
             self.create_team_page.message_for_field('country'),
             'The country that team members primarily identify with.'
         )
@@ -565,12 +570,14 @@ class CreateTeamTest(TeamsTabBase):
         Then I should see the error message and highlighted fields.
         """
         self.verify_and_navigate_to_create_team_page()
-        self.create_team_page.create_team()
+        self.create_team_page.submit_form()
 
         self.assertEqual(
             self.create_team_page.validation_message_text,
             'Your team could not be created. Check the highlighted fields below and try again.'
         )
+        self.assertTrue(self.create_team_page.error_for_field(field_id='name'))
+        self.assertTrue(self.create_team_page.error_for_field(field_id='description'))
 
     def test_user_can_see_error_message_for_incorrect_data(self):
         """
@@ -583,7 +590,7 @@ class CreateTeamTest(TeamsTabBase):
         Then I should see the error message for exceeding length.
         """
         self.verify_and_navigate_to_create_team_page()
-        self.create_team_page.create_team()
+        self.create_team_page.submit_form()
 
         # Fill the name field with >255 characters to see validation message.
         self.create_team_page.value_for_text_field(
@@ -594,17 +601,14 @@ class CreateTeamTest(TeamsTabBase):
                   'people use its platform. EdX differs from other MOOC platforms, such as Coursera and '
                   'Udacity, in that it is nonprofit and runs on an open-source software platform. '
                   'EdX was founded by the Massachusetts Institute of Technology and Harvard '
-                  'University in May 2012. EdX was created for students and institutions that seek '
-                  'to transform themselves through cutting-edge technologies, innovative pedagogy, and '
-                  'rigorous courses. More than 70 schools, nonprofits, corporations, and international '
-                  'organizations offer or plan to offer courses on the edX website. As of 22 October 2014, '
-                  'edX has more than 4 million users taking more than 500 courses online.'
+                  'University in May 2012.'
         )
 
         self.assertEqual(
             self.create_team_page.validation_message_text,
             'Your team could not be created. Check the highlighted fields below and try again.'
         )
+        self.assertTrue(self.create_team_page.error_for_field(field_id='name'))
 
     def test_user_can_create_new_team_successfully(self):
         """
@@ -620,15 +624,13 @@ class CreateTeamTest(TeamsTabBase):
         self.verify_and_navigate_to_create_team_page()
 
         self.fill_create_form()
-        self.create_team_page.create_team()
+        self.create_team_page.submit_form()
 
-        self.create_team_page.wait_for_ajax()
-        self.browse_teams_page.is_browser_on_page()
-
+        self.assertTrue(self.browse_teams_page.is_browser_on_page())
         self.assertEqual(self.browse_teams_page.get_pagination_header_text(), 'Showing 1 out of 1 total')
         # Verify the newly created team content.
         team_card = self.browse_teams_page.team_cards.results[0]
-        self.assertEqual(team_card.find_element_by_css_selector('.card-title').text, 'Avengers')
+        self.assertEqual(team_card.find_element_by_css_selector('.card-title').text, self.team_name)
         self.assertEqual(
             team_card.find_element_by_css_selector('.card-description').text,
             'The Avengers are a fictional team of superheroes.'
@@ -648,7 +650,5 @@ class CreateTeamTest(TeamsTabBase):
         self.verify_and_navigate_to_create_team_page()
         self.create_team_page.cancel_team()
 
-        self.create_team_page.wait_for_ajax()
-        self.browse_teams_page.is_browser_on_page()
-
+        self.assertTrue(self.browse_teams_page.is_browser_on_page())
         self.assertEqual(self.browse_teams_page.get_pagination_header_text(), 'Showing 0 out of 0 total')
