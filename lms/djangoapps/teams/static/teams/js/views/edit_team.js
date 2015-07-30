@@ -27,15 +27,18 @@ define(['backbone',
 
                    _.bindAll(this, "goBackToTopic", "createTeam");
 
+                   this.teamModel = new TeamModel({});
+                   this.teamModel.url = this.teamsUrl;
+
                    this.teamNameField = new FieldViews.TextFieldView({
-                       model: new TeamModel(),
+                       model: this.teamModel,
                        title: gettext("Team Name (Required) *"),
                        valueAttribute: 'name',
                        helpMessage: gettext("A name that identifies your team (maximum 255 characters).")
                    });
 
                    this.teamDescriptionField = new FieldViews.TextareaFieldView({
-                       model: new TeamModel(),
+                       model: this.teamModel,
                        title: gettext("Team Description (Required) *"),
                        valueAttribute: 'description',
                        editable: 'always',
@@ -44,14 +47,14 @@ define(['backbone',
                    });
 
                    this.optionalDescriptionField = new FieldViews.ReadonlyFieldView({
-                       model: new TeamModel(),
+                       model: this.teamModel,
                        title: gettext("Optional Characteristics"),
                        valueAttribute: 'optional_description',
-                       helpMessage: gettext("Help other learners decide whether to join your team by specifying some characteristics for your team. Choose carefully, because fewer people might be interested in joining your team if it seems too restrictive. You cannot change these characteristics after you create the team.")
+                       helpMessage: gettext("Help other learners decide whether to join your team by specifying some characteristics for your team. Choose carefully, because fewer people might be interested in joining your team if it seems too restrictive.")
                    });
 
                    this.teamLanguageField = new FieldViews.DropdownFieldView({
-                       model: new TeamModel(),
+                       model: this.teamModel,
                        title: gettext("Language"),
                        valueAttribute: 'language',
                        required: false,
@@ -62,7 +65,7 @@ define(['backbone',
                    });
 
                    this.teamCountryField = new FieldViews.DropdownFieldView({
-                       model: new TeamModel(),
+                       model: this.teamModel,
                        title: gettext('Country'),
                        valueAttribute: 'country',
                        required: false,
@@ -84,8 +87,12 @@ define(['backbone',
                },
 
                set: function(view, selector) {
-                   this.$el.find(selector).append(view.$el);
-                   view.render();
+                   var viewEl = view.$el;
+                   if (this.$(selector).has(viewEl).length) {
+                       view.render().setElement(viewEl);
+                   } else {
+                       this.$(selector).append(view.render().$el);
+                   }
                },
 
                createTeam: function () {
@@ -109,17 +116,17 @@ define(['backbone',
                        return;
                    }
 
-                   // Send AJAX request to Teams API
                    var view = this;
-                   $.ajax({
-                       type: 'POST',
-                       url: this.teamsUrl,
-                       data: data
-                   }).done(function () {
-                       view.goBackToTopic();
-                   }).fail(function (jqXHR) {
-                       view.showMessage(gettext('An error occurred. Please try again.'));
-                   });
+                   var options = {
+                       wait: true,
+                       success: function () {
+                           view.goBackToTopic();
+                       },
+                       error: function () {
+                           view.showMessage(gettext('An error occurred. Please try again.'));
+                       }
+                   };
+                   this.teamModel.save(data, options);
                },
 
                validateTeamData: function (data) {
@@ -152,7 +159,7 @@ define(['backbone',
                },
 
                showMessage: function (message) {
-                   this.$('.wrapper-msg').show();
+                   this.$('.wrapper-msg').removeClass('is-hidden');
                    this.$('.msg-content .copy p').text(message);
                },
 

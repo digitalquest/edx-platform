@@ -34,7 +34,7 @@ define([
             expect(Backbone.history.navigate.calls[1].args).toContain('browse');
 
             teamActionsView.$('a.create-team').click();
-            expect(Backbone.history.navigate.calls[2].args).toContain('topics/awesomeness/create_new_team');
+            expect(Backbone.history.navigate.calls[2].args).toContain('topics/awesomeness/create-team');
         });
     });
 });

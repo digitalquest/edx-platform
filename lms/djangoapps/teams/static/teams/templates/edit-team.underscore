@@ -1,7 +1,7 @@
-<div class="wrapper-msg is-incontext urgency-low warning">
+<div class="create-team wrapper-msg is-incontext urgency-low warning is-hidden">
     <div class="msg">
         <div class="msg-content">
-            <h3 class="title"><%= gettext("Oops!") %></h3>
+            <h3 class="title"><%- gettext("Oops!") %></h3>
             <div class="copy">
                 <p aria-live="polite"></p>
             </div>
@@ -18,6 +18,16 @@
 </div>
 
 <div class="create-team form-actions">
-    <button class="action action-primary"><%- gettext("Create") %><span class="sr"><%- gettext("a new team") %></span></button>
-    <button class="action action-cancel"><%= gettext("Cancel") %><span class="sr"><%- gettext("new team creation") %></span></button>
+    <button class="action action-primary">
+        <%- gettext("Create") %>
+        <span class="sr">
+            <%- gettext("a new team") %>
+        </span>
+    </button>
+    <button class="action action-cancel">
+        <%- gettext("Cancel") %>
+        <span class="sr">
+            <%- gettext("new team creation") %>
+        </span>
+    </button>
 </div>

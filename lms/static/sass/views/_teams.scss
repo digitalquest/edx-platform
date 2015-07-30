@@ -496,9 +496,10 @@
 
 .teams-content {
 
-  .create-new-team {
-    padding: $baseline;
-    overflow: hidden;
+  .teams-main {
+
+    .team-edit-fields {
+      @include clearfix();
 
     .team-required-fields {
       @include float(left);
@@ -559,7 +560,7 @@
       width: 40%;
 
       .u-field.u-field-optional_description {
-        margin-bottom: ($baseline/5);
+        margin-bottom: ($baseline/2);
 
         .u-field-title {
           color: $base-font-color;
@@ -597,70 +598,28 @@
       }
     }
 
+  }
+
     .u-field {
       padding: 0;
     }
 
     .u-field.error {
       input, textarea {
-        border-color: $red;
+        border-color: $error-red;
       }
 
       .u-field-message-help, .u-field-description-message {
-        color: $red !important;
+        color: $error-red !important;
       }
     }
 
-    .wrapper-msg {
-      display: none;
+    .create-team.wrapper-msg {
       margin: 0 0 $baseline 0;
     }
   }
 }
 
-@mixin button-base-sytle($text-color) {
-  font-family: inherit;
-  font-size: 1em;
-  font-weight: 400;
-  text-shadow: none;
-
-  background: none;
-  border: none;
-  box-shadow: none;
-
-  color: $text-color;
-
-  &:hover {
-      background: none;
-  }
-
-  &:focus, &:active {
-    box-shadow: none;
-  }
-}
-
 .create-team.form-actions {
-  @include float(left);
-  margin-top: ($baseline*2);
-}
-
-%team-edit-notification-base {
-  margin-bottom: $baseline;
-  border-left: ($baseline/2) solid red;
-  height: 50px;
-  border-radius: ($baseline/4);
-  padding-left: ($baseline/4);
-  line-height: 50px;
-}
-
-.team-edit-notification-wrapper.error {
-  @extend %team-edit-notification-base;
-  border-left: ($baseline/2) solid $red;
-  background-color: $red-l1;
-}
-
-.team-edit-notification-wrapper.success {
-  @extend %team-edit-notification-base;
-  border-left: ($baseline/2) solid $m-green-s1;
-  background-color: $green-l1;
+  margin-top: $baseline;
 }

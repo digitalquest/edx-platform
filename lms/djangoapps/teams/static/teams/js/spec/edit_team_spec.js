@@ -9,15 +9,54 @@ define([
 
     describe('EditTeam', function () {
         var teamEditView,
-            verifyValidation = function (fieldsData) {
+            teamsUrl = '/api/team/v0/teams/',
+            teamsData = {
+                id: null,
+                name: "TeamName",
+                is_active: null,
+                course_id: "a/b/c",
+                topic_id: "awesomeness",
+                date_created: "",
+                description: "TeamDescription",
+                country: "c",
+                language: "a",
+                membership: []
+            },
+            verifyValidation = function (requests, fieldsData) {
                 _.each(fieldsData, function (fieldData) {
                     teamEditView.$(fieldData[0]).val(fieldData[1]);
                 });
+
                 teamEditView.$('.create-team.form-actions .action-primary').click();
-                expect(teamEditView.$('.wrapper-msg').is(':visible')).toBeTruthy();
-                expect(teamEditView.$('.wrapper-msg .title').text().trim()).toBe("Oops!");
-                var errorMessage = "Your team could not be created. Check the highlighted fields below and try again.";
-                expect(teamEditView.$('.wrapper-msg .copy').text().trim()).toBe(errorMessage);
+
+                var message = teamEditView.$('.wrapper-msg');
+                expect(message.is(':visible')).toBeTruthy();
+                expect(message.find('.title').text().trim()).toBe("Oops!");
+                expect(message.find('.copy').text().trim()).toBe(
+                    "Your team could not be created. Check the highlighted fields below and try again."
+                );
+
+                _.each(fieldsData, function (fieldData) {
+                    if(fieldData[2] === 'error') {
+                        expect(teamEditView.$(fieldData[0].split(" ")[0] + '.error').length).toBe(1);
+                    } else if(fieldData[2] === 'success') {
+                        expect(teamEditView.$(fieldData[0].split(" ")[0] + '.error').length).toBe(0);
+                    }
+                });
+
+                expect(requests.length).toBe(0);
+            },
+            expectContent = function (selector, text) {
+                expect(teamEditView.$(selector).text().trim()).toBe(text);
+            },
+            verifyDropdownData = function (selector, expectedItems) {
+                var options = teamEditView.$(selector)[0].options;
+                var renderedItems = $.map(options, function( elem ) {
+                    return [[elem.value, elem.text]];
+                });
+                for (var i = 0; i < expectedItems.length; i++) {
+                    expect(renderedItems).toContain(expectedItems[i]);
+                }
             };
 
         beforeEach(function () {
@@ -26,14 +65,46 @@ define([
             teamEditView = new TeamEditView({
                 el: $('.teams-content'),
                 teamParams: {
+                    teamsUrl: teamsUrl,
+                    courseId: "a/b/c",
                     topicId: 'awesomeness',
                     topicName: 'Awesomeness',
                     languages: [['a', 'aaa'], ['b', 'bbb']],
                     countries: [['c', 'ccc'], ['d', 'ddd']]
                 }
             }).render();
+        });
 
-            teamEditView.$('.wrapper-msg').hide();
+        it('can render itself correctly', function () {
+            expectContent('.u-field-name .u-field-title', "Team Name (Required) *");
+            expectContent(
+                '.u-field-name .u-field-message-help', "A name that identifies your team (maximum 255 characters)."
+            );
+            expectContent('.u-field-description .u-field-title', "Team Description (Required) *");
+            var descriptionFieldMessage = "A short description of the team to help other learners understand " +
+                "the goals or direction of the team (maximum 300 characters).";
+            expectContent('.u-field-description-message', descriptionFieldMessage);
+            expectContent('.u-field-optional_description .u-field-title', "Optional Characteristics");
+            var optionalDescriptionMessage = "Help other learners decide whether to join your team by specifying " +
+                "some characteristics for your team. Choose carefully, because fewer people might be interested in " +
+                "joining your team if it seems too restrictive. You cannot change these characteristics after you " +
+                "create the team.";
+            expectContent('.u-field-optional_description .u-field-message-help', optionalDescriptionMessage);
+            expectContent('.u-field-language .u-field-title', "Language");
+            expectContent(
+                '.u-field-language .u-field-message-help',
+                "The language that team members primarily use to communicate with each other."
+            );
+            expectContent('.u-field-country .u-field-title', "Country");
+            expectContent(
+                '.u-field-country .u-field-message-help', "The country that team members primarily identify with."
+            );
+
+            verifyDropdownData('.u-field-language select', [['a', 'aaa'], ['b', 'bbb']]);
+            verifyDropdownData('.u-field-country select', [['c', 'ccc'], ['d', 'ddd']]);
+
+            expect(teamEditView.$('.create-team.form-actions .action-primary').length).toBe(1);
+            expect(teamEditView.$('.create-team.form-actions .action-cancel').length).toBe(1);
         });
 
         it('can create a team', function () {
@@ -45,57 +116,49 @@ define([
             teamEditView.$('.u-field-country select').val('c').attr("selected", "selected");
 
             teamEditView.$('.create-team.form-actions .action-primary').click();
-            AjaxHelpers.respondWithJson(requests, {
-                "id": "tn",
-                "name": "TeamName",
-                "is_active": true,
-                "course_id": "a/b/c",
-                "topic_id": "awesomeness",
-                "date_created": "2015-07-29T09:59:37.528Z",
-                "description": "TeamDescription",
-                "country": "c",
-                "language": "a",
-                "membership": []
-            });
+            AjaxHelpers.expectJsonRequest(requests, 'POST', teamsUrl, teamsData);
+            AjaxHelpers.respondWithJson(requests, teamsData);
 
-            expect(teamEditView.$('.wrapper-msg').is(':visible')).toBeFalsy();
+            expect(teamEditView.$('.create-team.wrapper-msg .copy').text().trim().length).toBe(0);
             expect(Backbone.history.navigate.calls[0].args).toContain('topics/awesomeness');
         });
 
         it('shows validation error message when field is empty', function () {
-            verifyValidation([
-                ['.u-field-name input', 'Name'],
-                ['.u-field-textarea textarea', '']
+            var requests = AjaxHelpers.requests(this);
+            verifyValidation(requests, [
+                ['.u-field-name input', 'Name', 'success'],
+                ['.u-field-textarea textarea', '', 'error']
             ]);
-            teamEditView.$('.wrapper-msg').hide();
-            verifyValidation([
-                ['.u-field-name input', ''],
-                ['.u-field-textarea textarea', 'description']
+            teamEditView.render();
+            verifyValidation(requests, [
+                ['.u-field-name input', '', 'error'],
+                ['.u-field-textarea textarea', 'description', 'success']
             ]);
-            teamEditView.$('.wrapper-msg').hide();
-            verifyValidation([
-                ['.u-field-name input', ''],
-                ['.u-field-textarea textarea', '']
+            teamEditView.render();
+            verifyValidation(requests, [
+                ['.u-field-name input', '', 'error'],
+                ['.u-field-textarea textarea', '', 'error']
             ]);
         });
 
         it('shows validation error message when field value length exceeded the limit', function () {
+            var requests = AjaxHelpers.requests(this);
             var teamName = new Array(500 + 1).join( '$' );
             var teamDescription = new Array(500 + 1).join( '$' );
 
-            verifyValidation([
-                ['.u-field-name input', teamName],
-                ['.u-field-textarea textarea', 'description']
+            verifyValidation(requests, [
+                ['.u-field-name input', teamName, 'error'],
+                ['.u-field-textarea textarea', 'description', 'success']
             ]);
-            teamEditView.$('.wrapper-msg').hide();
-            verifyValidation([
-                ['.u-field-name input', 'name'],
-                ['.u-field-textarea textarea', teamDescription]
+            teamEditView.render();
+            verifyValidation(requests, [
+                ['.u-field-name input', 'name', 'success'],
+                ['.u-field-textarea textarea', teamDescription, 'error']
             ]);
-            teamEditView.$('.wrapper-msg').hide();
-            verifyValidation([
-                ['.u-field-name input', teamName],
-                ['.u-field-textarea textarea', teamDescription]
+            teamEditView.render();
+            verifyValidation(requests, [
+                ['.u-field-name input', teamName, 'error'],
+                ['.u-field-textarea textarea', teamDescription, 'error']
             ]);
         });
 
@@ -106,6 +169,7 @@ define([
             teamEditView.$('.u-field-textarea textarea').val('TeamDescription');
 
             teamEditView.$('.create-team.form-actions .action-primary').click();
+            AjaxHelpers.expectJsonRequest(requests, 'POST', teamsUrl, teamsData);
             AjaxHelpers.respondWithError(requests);
 
             expect(teamEditView.$('.wrapper-msg .copy').text().trim()).toBe("An error occurred. Please try again.");
@@ -115,14 +179,5 @@ define([
             teamEditView.$('.create-team.form-actions .action-cancel').click();
             expect(Backbone.history.navigate.calls[0].args).toContain('topics/awesomeness');
         });
-
-        it("only highlight fields with errors", function () {
-            teamEditView.$('.u-field-name input').val('TeamName');
-            teamEditView.$('.create-team.form-actions .action-primary').click();
-
-            expect(teamEditView.$('.u-field-description.error').length).toBe(1);
-            expect(teamEditView.$('.u-field-name.error').length).toBe(0);
-        });
-
     });
 });
