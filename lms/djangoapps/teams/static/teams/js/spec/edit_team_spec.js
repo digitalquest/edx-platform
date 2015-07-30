@@ -87,8 +87,7 @@ define([
             expectContent('.u-field-optional_description .u-field-title', "Optional Characteristics");
             var optionalDescriptionMessage = "Help other learners decide whether to join your team by specifying " +
                 "some characteristics for your team. Choose carefully, because fewer people might be interested in " +
-                "joining your team if it seems too restrictive. You cannot change these characteristics after you " +
-                "create the team.";
+                "joining your team if it seems too restrictive.";
             expectContent('.u-field-optional_description .u-field-message-help', optionalDescriptionMessage);
             expectContent('.u-field-language .u-field-title', "Language");
             expectContent(
@@ -169,6 +168,8 @@ define([
             teamEditView.$('.u-field-textarea textarea').val('TeamDescription');
 
             teamEditView.$('.create-team.form-actions .action-primary').click();
+            teamsData.country = '';
+            teamsData.language = '';
             AjaxHelpers.expectJsonRequest(requests, 'POST', teamsUrl, teamsData);
             AjaxHelpers.respondWithError(requests);
 

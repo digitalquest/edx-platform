@@ -115,7 +115,7 @@
                                        breadcrumbs: [
                                            {
                                                title: teamsView.main.teamParams.topicName,
-                                               url: '#topics/' + teamsView.main.teamParams.topicId//Backbone.history.location.href.replace(/\/create-team\/?/,  '')
+                                               url: '#topics/' + teamsView.main.teamParams.topicId
                                            }
                                        ]
                                    })
@@ -125,10 +125,6 @@
                                    teamParams: teamsView.main.teamParams
                                })
                            });
-
-                           //self.mainView = new CreateTeamView({
-                           //     teamParams: teamsView.main.teamParams
-                           //});
                            self.render();
                        });
                    },
