@@ -1,5 +1,34 @@
-<div>
+<div class="team-profile">
     <div class="discussion-module" data-course-id="<%= courseID %>" data-discussion-id="<%= discussionTopicID %>">
         <a href="#" class="new-post-btn" role="button"><span class="icon fa fa-edit new-post-icon"></span><%= gettext("New Post") %></a>
+    </div>
+
+    <div class="team-detail">
+        <h4><%- gettext("Team Details") %></h4>
+        <span>You are a member of this team.</span>
+        <div class="team-members">
+
+            <div class="members-info"></div>
+            <span>10/10 members</span>
+        </div>
+
+
+        <div>
+            <i class="u-field-icon icon fa fa-comment fa-fw" aria-hidden="true"></i>
+            <span>Language</span>
+        </div>
+        <div>
+            <i class="u-field-icon icon fa fa-globe fa-fw" aria-hidden="true"></i>
+            <span>Country</span>
+        </div>
+
+        <div class="leave-team">
+            <a href="#"><%- gettext("Leave Team") %></a>
+        </div>
+        <div class="invite-team">
+            <h6><%- gettext("Invite Others") %></h6>
+            <span>No invites available - this team is full</span>
+        </div>
+
     </div>
 </div>

@@ -346,6 +346,17 @@
     }
   }
 
+  .team-profile {
+    .discussion-module {
+      width: 60%;
+      @include float(left);
+    }
+    .team-detail {
+      @include float(left);
+      @include margin-left(($baseline + ($baseline/2)))
+    }
+  }
+
   .create-team {
 
     legend {
