@@ -220,7 +220,6 @@ class DjangoXBlockUserStateClient(XBlockUserStateClient):
             sample_rate=self.API_DATADOG_SAMPLE_RATE,
         )
 
-
     @contract(username="basestring", block_keys_to_state="dict(UsageKey: dict(basestring: *))", scope=ScopeBase)
     def set_many(self, username, block_keys_to_state, scope=Scope.user_state):
         """
