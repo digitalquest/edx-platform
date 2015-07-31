@@ -5,18 +5,20 @@ data in a Django ORM model.
 
 import itertools
 from operator import attrgetter
+from time import time
 
 try:
     import simplejson as json
 except ImportError:
     import json
 
-from django.contrib.auth.models import User
-from xblock.fields import Scope, ScopeBase
-from edx_user_state_client.interface import XBlockUserStateClient
-from courseware.models import StudentModule, StudentModuleHistory
+import dogstats_wrapper as dog_stats_api
 from contracts import contract, new_contract
+from django.contrib.auth.models import User
 from opaque_keys.edx.keys import UsageKey
+from xblock.fields import Scope, ScopeBase
+from courseware.models import StudentModule, StudentModuleHistory
+from edx_user_state_client.interface import XBlockUserStateClient
 
 new_contract('UsageKey', UsageKey)
 
@@ -25,6 +27,9 @@ class DjangoXBlockUserStateClient(XBlockUserStateClient):
     """
     An interface that uses the Django ORM StudentModule as a backend.
     """
+
+    # Use this sample rate for DataDog events.
+    API_DATADOG_SAMPLE_RATE = 0.01
 
     class ServiceUnavailable(XBlockUserStateClient.ServiceUnavailable):
         """
@@ -189,13 +194,32 @@ class DjangoXBlockUserStateClient(XBlockUserStateClient):
         if scope != Scope.user_state:
             raise ValueError("Only Scope.user_state is supported, not {}".format(scope))
 
+        evt_time = time()
+        block_count = state_length = 0
+
         modules = self._get_student_modules(username, block_keys)
         for module, usage_key in modules:
             if module.state is None:
                 state = {}
             else:
                 state = json.loads(module.state)
+                state_length += len(module.state)
+            block_count += 1
             yield (usage_key, state)
+
+        dog_stats_api.histogram(
+            'DjangoXBlockUserStateClient.get_many.blks_out',
+            block_count,
+            timestamp=evt_time,
+            sample_rate=self.API_DATADOG_SAMPLE_RATE,
+        )
+        dog_stats_api.histogram(
+            'DjangoXBlockUserStateClient.get_many.blks_size',
+            state_length,
+            timestamp=evt_time,
+            sample_rate=self.API_DATADOG_SAMPLE_RATE,
+        )
+
 
     @contract(username="basestring", block_keys_to_state="dict(UsageKey: dict(basestring: *))", scope=ScopeBase)
     def set_many(self, username, block_keys_to_state, scope=Scope.user_state):
@@ -222,6 +246,7 @@ class DjangoXBlockUserStateClient(XBlockUserStateClient):
         else:
             user = User.objects.get(username=username)
 
+        evt_time = time()
         for usage_key, state in block_keys_to_state.items():
             student_module, created = StudentModule.objects.get_or_create(
                 student=user,
@@ -233,15 +258,53 @@ class DjangoXBlockUserStateClient(XBlockUserStateClient):
                 },
             )
 
+            num_fields_before = num_fields_after = num_new_fields_set = len(state)
+            num_fields_updated = 0
             if not created:
                 if student_module.state is None:
                     current_state = {}
                 else:
                     current_state = json.loads(student_module.state)
+                num_fields_before = len(current_state)
                 current_state.update(state)
+                num_fields_after = len(current_state)
+                num_new_fields_set = num_fields_after - num_fields_before
+                num_fields_updated = max(0, len(state) - num_new_fields_set)
                 student_module.state = json.dumps(current_state)
                 # We just read this object, so we know that we can do an update
                 student_module.save(force_update=True)
+
+            # Event to record number of fields sent in to set/set_many.
+            dog_stats_api.histogram(
+                'DjangoXBlockUserStateClient.set_many.fields_in',
+                len(state),
+                timestamp=evt_time,
+                sample_rate=self.API_DATADOG_SAMPLE_RATE,
+            )
+
+            # Event to record number of new fields set in set/set_many.
+            dog_stats_api.histogram(
+                'DjangoXBlockUserStateClient.set_many.new_fields_set',
+                num_new_fields_set,
+                timestamp=evt_time,
+                sample_rate=self.API_DATADOG_SAMPLE_RATE,
+            )
+
+            # Event to record number of existing fields updated in set/set_many.
+            dog_stats_api.histogram(
+                'DjangoXBlockUserStateClient.set_many.fields_updated',
+                num_fields_updated,
+                timestamp=evt_time,
+                sample_rate=self.API_DATADOG_SAMPLE_RATE,
+            )
+
+        # Event for the entire set_many call.
+        dog_stats_api.histogram(
+            'DjangoXBlockUserStateClient.set_many.blks_updated',
+            len(block_keys_to_state),
+            timestamp=evt_time,
+            sample_rate=self.API_DATADOG_SAMPLE_RATE,
+        )
 
     @contract(
         username="basestring",
