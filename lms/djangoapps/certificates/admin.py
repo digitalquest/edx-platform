@@ -2,7 +2,9 @@
 django admin pages for certificates models
 """
 from django.contrib import admin
+from django import forms
 from config_models.admin import ConfigurationModelAdmin
+from util.organizations_helpers import get_organizations
 from certificates.models import (
     CertificateGenerationConfiguration,
     CertificateHtmlViewConfiguration,
@@ -12,11 +14,26 @@ from certificates.models import (
 )
 
 
+class CertificateTemplateForm(forms.ModelForm):
+    """
+    Django admin form for CertificateTemplate model
+    """
+    organizations = get_organizations()
+    org_choices = [(org["id"], org["name"]) for org in organizations]
+    org_choices.insert(0, ('', 'None'))
+    organization_id = forms.TypedChoiceField(choices=org_choices, required=False, coerce=int, empty_value=None)
+
+    class Meta(object):
+        """ Meta definitions for CertificateTemplateForm  """
+        model = CertificateTemplate
+
+
 class CertificateTemplateAdmin(admin.ModelAdmin):
     """
     Django admin customizations for CertificateTemplate model
     """
     list_display = ('name', 'description', 'organization_id', 'course_key', 'mode', 'is_active')
+    form = CertificateTemplateForm
 
 
 class CertificateTemplateAssetAdmin(admin.ModelAdmin):

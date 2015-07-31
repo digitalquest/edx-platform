@@ -331,12 +331,14 @@ def get_certificate_template(course_key, mode):
         template = CertificateTemplate.objects.filter(
             organization_id=org_id,
             course_key=course_key,
-            mode=mode
+            mode=mode,
+            is_active=True
         )
-    if not template and mode:
+    if not template and org_id and mode:
         template = CertificateTemplate.objects.filter(
             organization_id=org_id,
-            mode=mode
+            mode=mode,
+            is_active=True
         )
 
     return template[0].template if template else None

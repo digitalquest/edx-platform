@@ -29,6 +29,7 @@ from certificates.models import (
     CertificateStatuses,
     CertificateHtmlViewConfiguration,
     CertificateSocialNetworks,
+    CertificateTemplate,
 )
 
 from certificates.tests.factories import (
@@ -427,6 +428,20 @@ class CertificatesViewsTests(ModuleStoreTestCase, EventTrackingTestCase):
         self.course.save()
         self.store.update_item(self.course, self.user.id)
 
+    def _create_custom_template(self, org_id, mode='honor', course_key=None):
+        """
+        Creates a custom certificate template entry in DB.
+        """
+        template = CertificateTemplate(
+            name='custom template',
+            template='<html><body>lang: ${LANGUAGE_CODE} course name: ${accomplishment_copy_course_name}</body></html>',
+            organization_id=org_id,
+            course_key=course_key,
+            mode=mode,
+            is_active=True
+        )
+        template.save()
+
     @override_settings(FEATURES=FEATURES_WITH_CERTS_ENABLED)
     def test_render_html_view_valid_certificate(self):
         test_url = get_certificate_url(
@@ -691,6 +706,39 @@ class CertificatesViewsTests(ModuleStoreTestCase, EventTrackingTestCase):
                 self.assertEqual(response.status_code, 200)
                 response_json = json.loads(response.content)
                 self.assertEqual(CertificateStatuses.generating, response_json['add_status'])
+
+    @override_settings(FEATURES={
+        'CERTIFICATES_HTML_VIEW': True,
+        'CUSTOM_CERTIFICATE_TEMPLATES_ENABLED': True,
+        'USE_DJANGO_PIPELINE': True,
+    })
+    @override_settings(LANGUAGE_CODE='fr')
+    def test_certificate_custom_template_with_org_mode_course(self):
+        """
+        Tests custom template search and rendering.
+        """
+        self._add_course_certificates(count=1, signatory_count=2)
+        self._create_custom_template(1, mode='honor', course_key=unicode(self.course.id))
+        self._create_custom_template(2, mode='honor')
+        test_url = get_certificate_url(
+            user_id=self.user.id,
+            course_id=unicode(self.course.id)
+        )
+
+        with patch('certificates.api.get_course_organizations') as mock_get_orgs:
+            mock_get_orgs.side_effect = [
+                [{"id": 1, "name": "organization name"}],
+                [{"id": 2, "name": "organization name 2"}],
+            ]
+            response = self.client.get(test_url)
+            self.assertEqual(response.status_code, 200)
+            self.assertContains(response, 'lang: fr')
+            self.assertContains(response, 'course name: {}'.format(self.course.display_name))
+            # test with second organization template
+            response = self.client.get(test_url)
+            self.assertEqual(response.status_code, 200)
+            self.assertContains(response, 'lang: fr')
+            self.assertContains(response, 'course name: {}'.format(self.course.display_name))
 
 
 class TrackShareRedirectTest(ModuleStoreTestCase, EventTrackingTestCase):
