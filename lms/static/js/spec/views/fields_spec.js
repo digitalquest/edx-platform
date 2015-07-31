@@ -307,5 +307,30 @@ define(['backbone', 'jquery', 'underscore', 'common/js/spec_helpers/ajax_helpers
                 FieldViewsSpecHelpers.expectTitleAndMessageToContain(view, fieldData.title, fieldData.helpMessage, false);
                 expect(view.$('.u-field-value > a .u-field-link-title-' + view.options.valueAttribute).text().trim()).toBe(fieldData.linkTitle);
             });
+
+            it("correctly renders LinkFieldView", function() {
+                var fieldData = FieldViewsSpecHelpers.createFieldData(FieldViews.LinkFieldView, {
+                    title: 'Title',
+                    linkTitle: 'Link title',
+                    helpMessage: 'Click the link.',
+                    valueAttribute: 'password-reset'
+                });
+                var view = new FieldViews.LinkFieldView(fieldData).render();
+
+                FieldViewsSpecHelpers.expectTitleAndMessageToContain(view, fieldData.title, fieldData.helpMessage, false);
+                expect(view.$('.u-field-value > a .u-field-link-title-' + view.options.valueAttribute).text().trim()).toBe(fieldData.linkTitle);
+            });
+
+            it("can't persist changes if persistChanges is off", function() {
+                requests = AjaxHelpers.requests(this);
+                var fieldClasses = [
+                    FieldViews.TextFieldView,
+                    FieldViews.DropdownFieldView,
+                    FieldViews.TextareaFieldView
+                ];
+                for (var i = 0; i < fieldClasses.length; i++) {
+                    FieldViewsSpecHelpers.verifyPersistence(fieldClasses[i], requests);
+                }
+            });
         });
     });

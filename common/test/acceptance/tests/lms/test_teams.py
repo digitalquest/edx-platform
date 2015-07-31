@@ -574,7 +574,7 @@ class CreateTeamTest(TeamsTabBase):
 
         self.assertEqual(
             self.create_team_page.validation_message_text,
-            'Your team could not be created. Check the highlighted fields below and try again.'
+            'Check the highlighted fields below and try again.'
         )
         self.assertTrue(self.create_team_page.error_for_field(field_id='name'))
         self.assertTrue(self.create_team_page.error_for_field(field_id='description'))
@@ -606,7 +606,7 @@ class CreateTeamTest(TeamsTabBase):
 
         self.assertEqual(
             self.create_team_page.validation_message_text,
-            'Your team could not be created. Check the highlighted fields below and try again.'
+            'Check the highlighted fields below and try again.'
         )
         self.assertTrue(self.create_team_page.error_for_field(field_id='name'))
 

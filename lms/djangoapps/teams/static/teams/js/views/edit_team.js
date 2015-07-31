@@ -112,7 +112,7 @@ define(['backbone',
 
                    var validationResult = this.validateTeamData(data);
                    if (validationResult.status === false) {
-                       this.showMessage(validationResult.message);
+                       this.showMessage(validationResult.message, validationResult.srMessage);
                        return;
                    }
 
@@ -123,7 +123,8 @@ define(['backbone',
                            view.goBackToTopic();
                        },
                        error: function () {
-                           view.showMessage(gettext('An error occurred. Please try again.'));
+                           var message = gettext('An error occurred. Please try again.');
+                           view.showMessage(message, message);
                        }
                    };
                    this.teamModel.save(data, options);
@@ -131,7 +132,8 @@ define(['backbone',
 
                validateTeamData: function (data) {
                    var status = true,
-                       message = gettext("Your team could not be created. Check the highlighted fields below and try again.");
+                       message = gettext("Check the highlighted fields below and try again.");
+                   var srMessages = [];
 
                    this.teamNameField.unhighlightField();
                    this.teamDescriptionField.unhighlightField();
@@ -139,28 +141,46 @@ define(['backbone',
                    if (_.isEmpty(data.name.trim()) ) {
                        status = false;
                        this.teamNameField.highlightFieldOnError();
+                       srMessages.push(
+                           gettext("Please enter team name")
+                       );
                    } else if (data.name.length > this.maxTeamNameLength) {
                        status = false;
                        this.teamNameField.highlightFieldOnError();
+                       srMessages.push(
+                           gettext("Team name cannot have more than 255 characters")
+                       );
                    }
 
                    if (_.isEmpty(data.description.trim()) ) {
                        status = false;
                        this.teamDescriptionField.highlightFieldOnError();
+                       srMessages.push(
+                           gettext("Please enter team description")
+                       );
                    } else if (data.description.length > this.maxTeamDescriptionLength) {
                        status = false;
                        this.teamDescriptionField.highlightFieldOnError();
+                       srMessages.push(
+                           gettext("Team description cannot have more than 300 characters")
+                       );
                    }
 
                    return {
                        status: status,
-                       message: message
+                       message: message,
+                       srMessage: srMessages.join(" ")
                    };
                },
 
-               showMessage: function (message) {
+               showMessage: function (message, screenReaderMessage) {
                    this.$('.wrapper-msg').removeClass('is-hidden');
                    this.$('.msg-content .copy p').text(message);
+                   this.$('.wrapper-msg').focus();
+
+                   if (screenReaderMessage) {
+                       this.$('.screen-reader-message').text(screenReaderMessage);
+                   }
                },
 
                goBackToTopic: function () {

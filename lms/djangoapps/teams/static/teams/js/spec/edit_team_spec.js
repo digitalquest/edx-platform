@@ -31,9 +31,9 @@ define([
 
                 var message = teamEditView.$('.wrapper-msg');
                 expect(message.is(':visible')).toBeTruthy();
-                expect(message.find('.title').text().trim()).toBe("Oops!");
+                expect(message.find('.title').text().trim()).toBe("Your team could not created!");
                 expect(message.find('.copy').text().trim()).toBe(
-                    "Your team could not be created. Check the highlighted fields below and try again."
+                    "Check the highlighted fields below and try again."
                 );
 
                 _.each(fieldsData, function (fieldData) {
@@ -76,6 +76,11 @@ define([
         });
 
         it('can render itself correctly', function () {
+            expectContent(
+                '.team-instructions',
+                "Enter information to describe your team. You cannot change these details after you create the team."
+            );
+
             expectContent('.u-field-name .u-field-title', "Team Name (Required) *");
             expectContent(
                 '.u-field-name .u-field-message-help', "A name that identifies your team (maximum 255 characters)."

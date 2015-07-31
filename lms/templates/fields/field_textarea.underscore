@@ -8,15 +8,19 @@
     </div>
 
     <div class="u-field-value" id="u-field-value-<%- id %>" aria-labelledby="u-field-title-<%- id %>"><%
-        if (mode === 'edit') {
-            %><textarea id="u-field-textarea-<%- id %>" rows="4" aria-describedby="u-field-placeholder-value-<%- id %>"><%- value %></textarea><%
-        } else {
+        if (mode === 'edit') {%>
+            <% if (descriptionMessage) { %>
+                <textarea id="u-field-textarea-<%- id %>" rows="4" aria-describedby="u-field-description-help-<%- id %>"><%- value %></textarea>
+            <% } else { %>
+                <textarea id="u-field-textarea-<%- id %>" rows="4" aria-describedby="u-field-placeholder-value-<%- id %>"><%- value %></textarea>
+            <% } %>
+        <% } else {
             %><a href="#"><span class="sr"><%- screenReaderTitle %></span><span class="u-field-value-readonly" aria-hidden="false" aria-describedby="u-field-placeholder-value-<%- id %>"><%- value %></span><span class="sr"><%- gettext('Click to edit') %></span></a><%
         }
         %><span class="sr" id="u-field-placeholder-value-<%- id %>"><%- placeholderValue %></span>
     </div>
 
     <% if (descriptionMessage) { %>
-        <p class="u-field-description-message" id="u-field-message-help-<%- id %>"><%- descriptionMessage %></p>
+        <p class="u-field-description-message" id="u-field-description-help-<%- id %>"><%- descriptionMessage %></p>
     <% } %>
 </div>
