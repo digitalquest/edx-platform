@@ -279,6 +279,33 @@ class DiscussionTabSingleThreadTest(BaseDiscussionTestCase, DiscussionResponsePa
 
 
 @attr('shard_2')
+class DiscussionTabSingleThreadURLTest(DiscussionTabSingleThreadTest):
+    """
+    Tests for the discussion page displaying a single thread with encoded colon URL
+    """
+
+    def setUp(self):
+        super(DiscussionTabSingleThreadURLTest, self).setUp()
+        course_id = self.course_id.replace(':', '%3a')
+        AutoAuthPage(self.browser, course_id=course_id).visit()
+
+    def test_show_thread(self):
+        thread_id = "test_thread_{}".format(uuid4().hex)
+
+        thread_fixture = SingleThreadViewFixture(
+            Thread(
+                id=thread_id,
+                body=THREAD_CONTENT_WITH_LATEX,
+                commentable_id=self.discussion_id,
+                thread_type="discussion"
+            )
+        )
+        thread_fixture.push()
+        self.setup_thread_page(thread_id)
+        self.assertTrue(self.thread_page.is_discussion_body_visible())
+
+
+@attr('shard_2')
 class DiscussionTabMultipleThreadTest(BaseDiscussionTestCase):
     """
     Tests for the discussion page with multiple threads
