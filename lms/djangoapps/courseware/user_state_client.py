@@ -273,6 +273,20 @@ class DjangoXBlockUserStateClient(XBlockUserStateClient):
                 # We just read this object, so we know that we can do an update
                 student_module.save(force_update=True)
 
+            # Record whether a state row has been created or updated.
+            if created:
+                dog_stats_api.increment(
+                    'DjangoXBlockUserStateClient.set_many.state_created',
+                    timestamp=evt_time,
+                    sample_rate=self.API_DATADOG_SAMPLE_RATE,
+                )
+            else:
+                dog_stats_api.increment(
+                    'DjangoXBlockUserStateClient.set_many.state_updated',
+                    timestamp=evt_time,
+                    sample_rate=self.API_DATADOG_SAMPLE_RATE,
+                )
+
             # Event to record number of fields sent in to set/set_many.
             dog_stats_api.histogram(
                 'DjangoXBlockUserStateClient.set_many.fields_in',
